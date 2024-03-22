@@ -11,16 +11,24 @@ const SignIn = ({onSignIn}: SignInProps) => {
     <Form
       initialValues={{ remember: true }}
       onFinish={onSignIn}
+      title="Sign in"
     >
+      <div className="font-semibold mb-5 w-full text-center">Sign in</div>
       <Form.Item
         name="email"
-        rules={[{ required: true, message: 'Please input your Email!', type: "email" }]}
+        rules={[
+          {
+            required: true,
+            message: "Please input your Email!",
+            type: "email",
+          },
+        ]}
       >
         <Input prefix={<MailOutlined />} placeholder="Email" />
       </Form.Item>
       <Form.Item
         name="password"
-        rules={[{ required: true, message: 'Please input your Password!' }]}
+        rules={[{ required: true, message: "Please input your Password!" }]}
       >
         <Input
           prefix={<LockOutlined />}
@@ -31,9 +39,14 @@ const SignIn = ({onSignIn}: SignInProps) => {
 
       <Form.Item>
         <Button type="primary" htmlType="submit" className="w-full bg-blue-500">
-          Log in
+          Sign in
         </Button>
-        Or <Link to="/sign-up" className="underline">register now!</Link>
+        <div className="mt-2">
+          Or{" "}
+          <Link to="/sign-up" className="underline">
+            register now!
+          </Link>
+        </div>
       </Form.Item>
     </Form>
   );

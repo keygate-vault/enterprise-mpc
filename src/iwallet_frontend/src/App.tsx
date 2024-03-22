@@ -39,17 +39,16 @@ function App() {
 
   return (
     <BrowserRouter>
-      <main className="flex justify-center items-center h-[100vh]">
+      <main className="flex justify-center items-center h-[100vh] bg-gradient-to-b from-[#F9FAFA] to-[#EBF0F1]">
         <div className="w-full max-w-md px-8">
           <Routes>
-            <Route path="/sign-in" element={<SignIn onSignIn={onSignIn}/>}/>
-            <Route path="/sign-up" element={<SignUp onSignUp={onSignUp}/>}/>
+            <Route path="/sign-in" element={<SignIn onSignIn={onSignIn} />} />
+            <Route path="/sign-up" element={<SignUp onSignUp={onSignUp} />} />
           </Routes>
         </div>
       </main>
     </BrowserRouter>
-)
-  ;
+  );
 }
 
 export default App;

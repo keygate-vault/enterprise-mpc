@@ -2,47 +2,54 @@ import React from 'react';
 import { LockOutlined, MailOutlined } from '@ant-design/icons';
 import { Button, Form, Input } from 'antd';
 import {Link} from "react-router-dom";
+import Password from "antd/es/input/Password";
 
 type SignUpProps = {
-  onSignUp: ((values: any) => void) | undefined
-}
-const SignUp = ({onSignUp}: SignUpProps) => {
+  onSignUp: ((values: any) => void) | undefined;
+};
+const SignUp = ({ onSignUp }: SignUpProps) => {
   return (
     <Form
       initialValues={{ remember: true }}
       onFinish={onSignUp}
+      title="Sign up"
     >
+      <div className="font-semibold mb-5 w-full text-center">Sign up</div>
       <Form.Item
         name="email"
-        rules={[{ required: true, message: 'Please input your Email!', type: "email" }]}
+        rules={[
+          {
+            required: true,
+            message: "Please input your Email!",
+            type: "email",
+          },
+        ]}
       >
         <Input prefix={<MailOutlined />} placeholder="Email" />
       </Form.Item>
       <Form.Item
         name="password"
-        rules={[{ required: true, message: 'Please input your Password!' }]}
+        rules={[{ required: true, message: "Please input your Password!" }]}
       >
-        <Input
-          prefix={<LockOutlined />}
-          type="password"
-          placeholder="Password"
-        />
+        <Password prefix={<LockOutlined />} placeholder="Password" />
       </Form.Item>
       <Form.Item
         name="confirm"
-        dependencies={['password']}
+        dependencies={["password"]}
         hasFeedback
         rules={[
           {
             required: true,
-            message: 'Please confirm your password!',
+            message: "Please confirm your password!",
           },
           ({ getFieldValue }) => ({
             validator(_, value) {
-              if (!value || getFieldValue('password') === value) {
+              if (!value || getFieldValue("password") === value) {
                 return Promise.resolve();
               }
-              return Promise.reject(new Error('The new password that you entered do not match!'));
+              return Promise.reject(
+                new Error("The new password that you entered do not match!")
+              );
             },
           }),
         ]}
@@ -57,7 +64,12 @@ const SignUp = ({onSignUp}: SignUpProps) => {
         <Button type="primary" htmlType="submit" className="w-full bg-blue-500">
           Sign up
         </Button>
-        Or <Link to="/sign-in" className="underline">sign in!</Link>
+        <div className="mt-2">
+          Or{" "}
+          <Link to="/sign-in" className="underline">
+            sign in!
+          </Link>
+        </div>
       </Form.Item>
     </Form>
   );
