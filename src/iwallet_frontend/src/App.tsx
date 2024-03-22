@@ -1,6 +1,7 @@
 import { useState } from "react";
 // import { iwallet_backend } from "declarations/iwallet_backend";
 import { SignIn } from './components/Forms/SignIn/Index'
+import {SignUp} from "./components/Forms/SignUp/Index";
 
 function App() {
   const [registrationMessage, setRegistrationMessage] = useState("");
@@ -31,10 +32,14 @@ function App() {
     console.log('onSignIn', values)
   }
 
+  const onSignUp = (values: any) => {
+    console.log('onSignUp', values)
+  }
+
   return (
     <main className="flex justify-center items-center h-[100vh]">
       <div className="w-full max-w-md px-8">
-        <SignIn onSignIn={onSignIn} />
+        <SignUp onSignUp={onSignUp} />
       </div>
     </main>
   );
