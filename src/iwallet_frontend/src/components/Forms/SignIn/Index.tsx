@@ -1,6 +1,7 @@
 import React from 'react';
 import { LockOutlined, MailOutlined } from '@ant-design/icons';
 import { Button, Form, Input } from 'antd';
+import {Link} from "react-router-dom";
 
 type SignInProps = {
   onSignIn: ((values: any) => void) | undefined
@@ -32,7 +33,7 @@ const SignIn = ({onSignIn}: SignInProps) => {
         <Button type="primary" htmlType="submit" className="w-full bg-blue-500">
           Log in
         </Button>
-        Or <a className="underline" href="">register now!</a>
+        Or <Link to="/sign-up" className="underline">register now!</Link>
       </Form.Item>
     </Form>
   );

@@ -1,7 +1,8 @@
 import { useState } from "react";
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 // import { iwallet_backend } from "declarations/iwallet_backend";
 import { SignIn } from './components/Forms/SignIn/Index'
-import {SignUp} from "./components/Forms/SignUp/Index";
+import { SignUp } from "./components/Forms/SignUp/Index";
 
 function App() {
   const [registrationMessage, setRegistrationMessage] = useState("");
@@ -37,12 +38,18 @@ function App() {
   }
 
   return (
-    <main className="flex justify-center items-center h-[100vh]">
-      <div className="w-full max-w-md px-8">
-        <SignUp onSignUp={onSignUp} />
-      </div>
-    </main>
-  );
+    <BrowserRouter>
+      <main className="flex justify-center items-center h-[100vh]">
+        <div className="w-full max-w-md px-8">
+          <Routes>
+            <Route path="/sign-in" element={<SignIn onSignIn={onSignIn}/>}/>
+            <Route path="/sign-up" element={<SignUp onSignUp={onSignUp}/>}/>
+          </Routes>
+        </div>
+      </main>
+    </BrowserRouter>
+)
+  ;
 }
 
 export default App;
