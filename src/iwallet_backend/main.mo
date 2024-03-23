@@ -7,6 +7,7 @@ import Cycles "mo:base/ExperimentalCycles";
 import Debug "mo:base/Debug";
 import Blob "mo:base/Blob";
 import Buffer "mo:base/Buffer";
+import Array "mo:base/Array";
 import Hex "mo:encoding.mo/Hex";
 
 actor {
@@ -59,7 +60,8 @@ actor {
       };
     };
 
-    return Buffer.toArray(profiles);
+    let result = Buffer.toArray(profiles);
+    return result;
   };
 
   public func register(email : Text, name : Text) : async Result.Result<Profile, ProfileError> {

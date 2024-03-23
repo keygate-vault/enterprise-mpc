@@ -30,6 +30,7 @@ const columns: ColumnProps<User>[] = [
 const Dashboard = () => {
   const [dataSource, setDataSource] = useState<User[]>([]);
   const [api, contextHolder] = notification.useNotification();
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     fetchWallets();
@@ -37,7 +38,9 @@ const Dashboard = () => {
 
   const fetchWallets = async () => {
     try {
+      setIsLoading(true);
       const response = await iwallet_backend.getAll();
+      setIsLoading(false);
 
       if (response) {
         console.log("response", response);
@@ -65,11 +68,23 @@ const Dashboard = () => {
         <p className="text-lg">
           Create and view custodial wallets for your users.
         </p>
-        <Button type="primary" className="mt-4">
+        <Button
+          type="primary"
+          className="mt-4"
+          onClick={() => {
+            window.location.href = "/wallets/create";
+          }}
+        >
           New wallet
         </Button>
       </div>
-      <Table rowKey={"email"} dataSource={dataSource} columns={columns} />
+      <Table
+        loading={isLoading}
+        rowKey={"email"}
+        rowClassName={"cursor-pointer"}
+        dataSource={dataSource}
+        columns={columns}
+      />
     </main>
   );
 };
