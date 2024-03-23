@@ -29,13 +29,11 @@ actor {
       case null {
         Cycles.add<system>(100_000_000_000);
         let w = await Custodial.CustodialWallet();
-        let r = Map.put(wallets, thash, email, w);
+        let _ = Map.put(wallets, thash, email, w);
         let pubkraw = await w.public_key();
         let pubk = switch(pubkraw) {
           case (#Ok(score)) { score };
-          case (#Err(err)) { 
-            Debug.print("Error getting public key");
-            Debug.print(err);
+          case (#Err(_)) { 
             return #err(#notFound);
            };
         };
