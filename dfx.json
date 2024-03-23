@@ -1,4 +1,10 @@
 {
+  "defaults": {
+    "build": {
+      "args": "",
+      "packtool": "mops sources"
+    }
+  },
   "canisters": {
     "iwallet_backend": {
       "main": "src/iwallet_backend/main.mo",
@@ -13,12 +19,6 @@
       ],
       "type": "assets",
       "workspace": "iwallet_frontend"
-    }
-  },
-  "defaults": {
-    "build": {
-      "args": "",
-      "packtool": ""
     }
   },
   "output_env_file": ".env",

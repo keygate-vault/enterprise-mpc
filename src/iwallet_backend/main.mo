@@ -1,11 +1,12 @@
-import HashMap "mo:base/HashMap";
+import Map "mo:map/Map";
+import { nhash } "mo:map/Map";
 import Text "mo:base/Text";
 import Result "mo:base/Result";
 
 actor {
   public type ProfileError = { #notFound; #conflict };
 
-  let map = HashMap.HashMap<Text, Text>(5, Text.equal, Text.hash);
+  let map = Map.new<Nat, Nat>();
 
   public query func register(email : Text, name : Text) : async Result.Result<Text, ProfileError> {
     switch (map.get(email)) {
@@ -20,7 +21,7 @@ actor {
   };
 
   public query func lookup(email : Text) : async Result.Result<Text, ProfileError> {
-    switch (map.get(email)) {
+    let r = switch (map.get(email)) {
       case (?name) {
         return #ok(name);
       };
@@ -28,5 +29,6 @@ actor {
         return #err(#notFound);
       };
     };
+    return r;
   };
 };

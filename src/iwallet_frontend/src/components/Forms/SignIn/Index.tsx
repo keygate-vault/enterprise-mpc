@@ -1,12 +1,11 @@
-import React from 'react';
-import { LockOutlined, MailOutlined } from '@ant-design/icons';
-import { Button, Form, Input } from 'antd';
-import {Link} from "react-router-dom";
+import { LockOutlined, MailOutlined } from "@ant-design/icons";
+import { Button, Form, Input } from "antd";
+import { Link } from "react-router-dom";
 
 type SignInProps = {
-  onSignIn: ((values: any) => void) | undefined
-}
-const SignIn = ({onSignIn}: SignInProps) => {
+  onSignIn: ((values: any) => void) | undefined;
+};
+const SignIn = ({ onSignIn }: SignInProps) => {
   return (
     <Form
       initialValues={{ remember: true }}

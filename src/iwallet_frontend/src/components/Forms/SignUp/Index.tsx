@@ -1,7 +1,6 @@
-import React from 'react';
-import { LockOutlined, MailOutlined } from '@ant-design/icons';
-import { Button, Form, Input } from 'antd';
-import {Link} from "react-router-dom";
+import { LockOutlined, MailOutlined } from "@ant-design/icons";
+import { Button, Form, Input } from "antd";
+import { Link } from "react-router-dom";
 import Password from "antd/es/input/Password";
 
 type SignUpProps = {
