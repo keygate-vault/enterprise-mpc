@@ -1,7 +1,8 @@
-import { Button, notification } from "antd";
+import { Button, Modal, notification } from "antd";
 import Table, { ColumnProps } from "antd/es/table";
 import { useEffect, useState } from "react";
 import { iwallet_backend } from "../../../../declarations/iwallet_backend";
+import CreateWalletModal from "../Wallets/Create";
 
 type User = {
   name: string;
@@ -29,8 +30,9 @@ const columns: ColumnProps<User>[] = [
 
 const Dashboard = () => {
   const [dataSource, setDataSource] = useState<User[]>([]);
-  const [api, contextHolder] = notification.useNotification();
+  const [api] = notification.useNotification();
   const [isLoading, setIsLoading] = useState(false);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     fetchWallets();
@@ -61,6 +63,10 @@ const Dashboard = () => {
     }
   };
 
+  const showModal = () => {
+    setOpen(true);
+  };
+
   return (
     <main className="flex min-h-screen flex-col items-left p-16">
       <h1 className="text-3xl font-bold">Wallets</h1>
@@ -72,12 +78,19 @@ const Dashboard = () => {
           type="primary"
           className="mt-4"
           onClick={() => {
-            window.location.href = "/wallets/create";
+            showModal();
           }}
         >
           New wallet
         </Button>
       </div>
+      <CreateWalletModal
+        visible={open}
+        setVisible={setOpen}
+        refreshWallets={() => {
+          fetchWallets();
+        }}
+      />
       <Table
         loading={isLoading}
         rowKey={"email"}
