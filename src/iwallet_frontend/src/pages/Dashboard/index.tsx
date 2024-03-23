@@ -1,29 +1,13 @@
-import { Button } from "antd";
+import { Button, notification } from "antd";
 import Table, { ColumnProps } from "antd/es/table";
+import { useEffect, useState } from "react";
+import { iwallet_backend } from "../../../../declarations/iwallet_backend";
 
 type User = {
   name: string;
   email: string;
   publicKey: string;
 };
-
-const dataSource = [
-  {
-    name: "John Doe",
-    email: "thevincentes@gmail.com",
-    publicKey: "0x1234567890abcdef",
-  },
-  {
-    name: "Maria Nociella",
-    email: "bzer@gmail.com",
-    publicKey: "0xabcdef1234567890",
-  },
-  {
-    name: "Juan Sanseviero",
-    email: "jsansev@gmail.com",
-    publicKey: "0xabcdef123456789032",
-  },
-];
 
 const columns: ColumnProps<User>[] = [
   {
@@ -44,6 +28,36 @@ const columns: ColumnProps<User>[] = [
 ];
 
 const Dashboard = () => {
+  const [dataSource, setDataSource] = useState<User[]>([]);
+  const [api, contextHolder] = notification.useNotification();
+
+  useEffect(() => {
+    fetchWallets();
+  }, []);
+
+  const fetchWallets = async () => {
+    try {
+      const response = await iwallet_backend.getAll();
+
+      if (response) {
+        console.log("response", response);
+        setDataSource(response);
+      } else {
+        api.error({
+          message: "Failed to fetch collections",
+          description: "Please try again later.",
+          placement: "bottom",
+        });
+      }
+    } catch (error) {
+      api.error({
+        message: "Error fetching collections",
+        description: "Please try again later.",
+        placement: "bottom",
+      });
+    }
+  };
+
   return (
     <main className="flex min-h-screen flex-col items-left p-16">
       <h1 className="text-3xl font-bold">Wallets</h1>
@@ -55,7 +69,7 @@ const Dashboard = () => {
           New wallet
         </Button>
       </div>
-      <Table dataSource={dataSource} columns={columns} />
+      <Table rowKey={"email"} dataSource={dataSource} columns={columns} />
     </main>
   );
 };
