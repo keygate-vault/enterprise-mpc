@@ -1,52 +1,62 @@
-import { useState } from "react";
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-// import { iwallet_backend } from "declarations/iwallet_backend";
-import { SignIn } from './components/Forms/SignIn/Index'
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { iwallet_backend } from "../../declarations/iwallet_backend";
+import { SignIn } from "./components/Forms/SignIn/Index";
 import { SignUp } from "./components/Forms/SignUp/Index";
+import Dashboard from "./pages/Dashboard";
+import { ConfigProvider } from "antd";
 
 function App() {
-  const [registrationMessage, setRegistrationMessage] = useState("");
-  const [lookupResult, setLookupResult] = useState("");
-
-  // async function handleRegister(event) {
-  //   event.preventDefault();
-  //   const email = event.target.elements.email.value;
-  //   const name = event.target.elements.name.value;
-  //   const message = await iwallet_backend.register(email, name);
-  //   setRegistrationMessage(message);
-  //   return false;
-  // }
-  //
-  // async function handleLookup(event) {
-  //   event.preventDefault();
-  //   const email = event.target.elements.lookupEmail.value;
-  //   const result = await iwallet_backend.lookup(email);
-  //   if (result.ok) {
-  //     setLookupResult(`Name: ${result.ok}`);
-  //   } else {
-  //     setLookupResult(`Error: ${result.err}`);
-  //   }
-  //   return false;
-  // }
-
   const onSignIn = (values: any) => {
-    console.log('onSignIn', values)
-  }
+    console.log("onSignIn", values);
+  };
 
-  const onSignUp = (values: any) => {
-    console.log('onSignUp', values)
-  }
+  const onSignUp = async (values: any) => {
+    console.log("onSignUp", values);
+    const result = await iwallet_backend.register(values.email, values.name);
+    console.log("onSignUp result", result);
+  };
 
   return (
     <BrowserRouter>
-      <main className="flex justify-center items-center h-[100vh] bg-gradient-to-b from-[#F9FAFA] to-[#EBF0F1]">
-        <div className="w-full max-w-md px-8">
-          <Routes>
-            <Route path="/sign-in" element={<SignIn onSignIn={onSignIn} />} />
-            <Route path="/sign-up" element={<SignUp onSignUp={onSignUp} />} />
-          </Routes>
-        </div>
-      </main>
+      <ConfigProvider
+        theme={{
+          token: {
+            fontFamily: "Inter, sans-serif",
+          },
+          components: {
+            Table: {
+              fontSize: 12,
+            },
+          },
+        }}
+      >
+        <main
+          className="h-[100vh] bg-gradient-to-b from-[#F9FAFA] to-[#EBF0F1]"
+          style={{ fontFamily: "Inter, sans-serif" }}
+        >
+          <div className="w-full px-8 h-full">
+            <Routes>
+              <Route
+                path="/sign-in"
+                element={
+                  <div className="flex items-center justify-center h-full">
+                    <SignIn onSignIn={onSignIn} />
+                  </div>
+                }
+              />
+              <Route
+                path="/sign-up"
+                element={
+                  <div className="flex items-center justify-center h-full">
+                    <SignUp onSignUp={onSignUp} />
+                  </div>
+                }
+              />
+              <Route path="/" element={<Dashboard />} />
+            </Routes>
+          </div>
+        </main>
+      </ConfigProvider>
     </BrowserRouter>
   );
 }

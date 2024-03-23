@@ -11,6 +11,7 @@ const SignIn = ({ onSignIn }: SignInProps) => {
       initialValues={{ remember: true }}
       onFinish={onSignIn}
       title="Sign in"
+      className="w-[400px]"
     >
       <div className="font-semibold mb-5 w-full text-center">Sign in</div>
       <Form.Item
@@ -18,7 +19,7 @@ const SignIn = ({ onSignIn }: SignInProps) => {
         rules={[
           {
             required: true,
-            message: "Please input your Email!",
+            message: "Email is required.",
             type: "email",
           },
         ]}
