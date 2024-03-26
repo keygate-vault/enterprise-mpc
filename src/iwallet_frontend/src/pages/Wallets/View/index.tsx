@@ -109,17 +109,12 @@ const WalletDetail = () => {
 
   function publicKeyToBTCAddress(publicKey: string): string {
     try {
-      // SHA-256 hash of the public key bytes
       const sha256Hash = sha3_256(Buffer.from(publicKey, "hex"));
 
-      // RIPEMD-160 hash of the SHA-256 hash
       const ripemd160Hash = CryptoJS.RIPEMD160(sha256Hash).toString(
         CryptoJS.enc.Hex
       );
 
-      // Concatenate the witness version (0x00) and the hash buffer
-
-      // Encode the witness script using Bech32 encoding
       const bech32Words = bech32.toWords(Buffer.from(ripemd160Hash, "hex"));
       const words = new Uint8Array([0, ...bech32Words]);
 
