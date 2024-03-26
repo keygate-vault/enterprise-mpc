@@ -5,6 +5,7 @@ import { SignUp } from "./components/Forms/SignUp/Index";
 import Dashboard from "./pages/Dashboard";
 import { ConfigProvider } from "antd";
 import CreateWallet from "./pages/Wallets/Create";
+import WalletDetail from "./pages/Wallets/View";
 
 function App() {
   const onSignIn = (values: any) => {
@@ -32,10 +33,10 @@ function App() {
         }}
       >
         <main
-          className="h-[100vh] bg-gradient-to-b from-[#F9FAFA] to-[#EBF0F1]"
+          className="h-full bg-gradient-to-b from-[#F9FAFA] to-[#EBF0F1]"
           style={{ fontFamily: "Inter, sans-serif" }}
         >
-          <div className="w-full px-8 h-full">
+          <div className="w-screen h-full">
             <Routes>
               <Route
                 path="/sign-in"
@@ -54,7 +55,7 @@ function App() {
                 }
               />
               <Route path="/" element={<Dashboard />} />
-              <Route path="/wallets/create" element={<CreateWallet />} />
+              <Route path="/wallets/:email" element={<WalletDetail />} />
             </Routes>
           </div>
         </main>

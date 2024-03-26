@@ -3,6 +3,7 @@ import Table, { ColumnProps } from "antd/es/table";
 import { useEffect, useState } from "react";
 import { iwallet_backend } from "../../../../declarations/iwallet_backend";
 import CreateWalletModal from "../Wallets/Create";
+import { useNavigate, useParams } from "react-router-dom";
 
 type User = {
   name: string;
@@ -33,6 +34,7 @@ const Dashboard = () => {
   const [api] = notification.useNotification();
   const [isLoading, setIsLoading] = useState(false);
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchWallets();
@@ -61,6 +63,10 @@ const Dashboard = () => {
         placement: "bottom",
       });
     }
+  };
+
+  const onRowClick = (record: User) => {
+    navigate(`/wallets/${record.email}`);
   };
 
   const showModal = () => {
@@ -97,6 +103,9 @@ const Dashboard = () => {
         rowClassName={"cursor-pointer"}
         dataSource={dataSource}
         columns={columns}
+        onRow={(record) => ({
+          onClick: () => onRowClick(record),
+        })}
       />
     </main>
   );
