@@ -8,7 +8,10 @@
   "canisters": {
     "iwallet_backend": {
       "main": "src/iwallet_backend/main.mo",
-      "type": "motoko"
+      "type": "motoko",
+      "dependencies": [
+        "evm_rpc"
+      ]
     },
     "iwallet_frontend": {
       "dependencies": [
@@ -19,6 +22,10 @@
       ],
       "type": "assets",
       "workspace": "iwallet_frontend"
+    },
+    "evm_rpc": {
+      "type": "pull",
+      "id": "7hfb6-caaaa-aaaar-qadga-cai"
     }
   },
   "output_env_file": ".env",
