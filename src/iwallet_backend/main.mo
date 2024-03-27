@@ -27,7 +27,7 @@ actor {
   let wallets = Map.new<Text, CustodialWallet>();
   let walletsArray = Buffer.Buffer<Wallet>(0);
 
-  public func getAll() : async [Wallet] {
+  public query func getAll() : async [Wallet] {
     let result = Buffer.toArray(walletsArray);
     return result;
   };
@@ -38,7 +38,7 @@ actor {
     switch (a) {
       case null {
         Cycles.add<system>(100_000_000_000);
-        
+
         let walletCanister = await Custodial.CustodialWallet();
         let _ = Map.put(wallets, thash, email, walletCanister);
         let pubkraw = await walletCanister.public_key();
