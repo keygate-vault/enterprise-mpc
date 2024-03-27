@@ -69,6 +69,8 @@ actor {
     switch (a) {
       case null {
         Cycles.add<system>(100_000_000_000);
+        // icp
+        
         let w = await Custodial.CustodialWallet();
         let _ = Map.put(wallets, thash, email, w);
         let pubkraw = await w.public_key();

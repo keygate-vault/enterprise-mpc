@@ -1,5 +1,6 @@
 import Principal "mo:base/Principal";
 import Error "mo:base/Error";
+import Cycles "mo:base/ExperimentalCycles";
 
 actor class CustodialWallet() {
   type IC = actor {
@@ -17,6 +18,23 @@ actor class CustodialWallet() {
   
 
   let ic : IC = actor "aaaaa-aa" : IC;
+
+  public shared (msg) func sign(message_hash: Blob) : async { #Ok : { signature: Blob };  #Err : Text } {
+    assert(message_hash.size() == 32);
+    let caller = Principal.toBlob(msg.caller);
+    try {
+      Cycles.add<system>(10_000_000_000);
+
+      let { signature } = await ic.sign_with_ecdsa({
+          message_hash;
+          derivation_path = [ caller ];
+          key_id = { curve = #secp256k1; name = "dfx_test_key" };
+      });
+      #Ok({ signature })
+    } catch (err) {
+      #Err(Error.message(err))
+    }
+  };
 
   public shared (msg) func public_key() : async { #Ok : { public_key: Blob }; #Err : Text } {
       let caller = Principal.toBlob(msg.caller);
