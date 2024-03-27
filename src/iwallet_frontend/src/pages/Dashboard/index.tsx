@@ -5,22 +5,16 @@ import { iwallet_backend } from "../../../../declarations/iwallet_backend";
 import CreateWalletModal from "../Wallets/Create";
 import { useNavigate, useParams } from "react-router-dom";
 
-type User = {
-  name: string;
-  email: string;
+type Wallet = {
+  id: string;
   publicKey: string;
 };
 
-const columns: ColumnProps<User>[] = [
+const columns: ColumnProps<Wallet>[] = [
   {
-    title: "NAME",
-    dataIndex: "name",
-    key: "name",
-  },
-  {
-    title: "EMAIL",
-    dataIndex: "email",
-    key: "email",
+    title: "ID",
+    dataIndex: "id",
+    key: "id",
   },
   {
     title: "PUBLIC KEY",
@@ -30,7 +24,7 @@ const columns: ColumnProps<User>[] = [
 ];
 
 const Dashboard = () => {
-  const [dataSource, setDataSource] = useState<User[]>([]);
+  const [dataSource, setDataSource] = useState<Wallet[]>([]);
   const [api] = notification.useNotification();
   const [isLoading, setIsLoading] = useState(false);
   const [open, setOpen] = useState(false);
@@ -45,28 +39,32 @@ const Dashboard = () => {
       setIsLoading(true);
       const response = await iwallet_backend.getAll();
       setIsLoading(false);
-
       if (response) {
         console.log("response", response);
-        setDataSource(response);
+        const wallets = response.map((wallet) => ({
+          id: wallet.id.toText(),
+          publicKey: wallet.publicKey,
+        }));
+
+        setDataSource(wallets);
       } else {
         api.error({
-          message: "Failed to fetch collections",
+          message: "Failed to fetch wallets",
           description: "Please try again later.",
           placement: "bottom",
         });
       }
     } catch (error) {
       api.error({
-        message: "Error fetching collections",
+        message: "Error fetching wallets",
         description: "Please try again later.",
         placement: "bottom",
       });
     }
   };
 
-  const onRowClick = (record: User) => {
-    navigate(`/wallets/${record.email}`);
+  const onRowClick = (record: Wallet) => {
+    navigate(`/wallets/${record.id}`);
   };
 
   const showModal = () => {
@@ -99,8 +97,8 @@ const Dashboard = () => {
       />
       <Table
         loading={isLoading}
-        rowKey={"email"}
-        rowClassName={"cursor-pointer"}
+        rowKey="id"
+        rowClassName="cursor-pointer"
         dataSource={dataSource}
         columns={columns}
         onRow={(record) => ({

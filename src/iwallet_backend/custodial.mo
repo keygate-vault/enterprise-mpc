@@ -3,7 +3,7 @@ import Error "mo:base/Error";
 import Cycles "mo:base/ExperimentalCycles";
 
 
-actor class CustodialWallet() {
+actor class CustodialWallet() = self {
   type IC = actor {
     ecdsa_public_key : ({
       canister_id : ?Principal;
@@ -19,6 +19,11 @@ actor class CustodialWallet() {
   
 
   let ic : IC = actor "aaaaa-aa" : IC;
+
+  public func getId() : async Principal {
+    let result = Principal.fromActor(self);
+    return result;
+  };
 
   public shared (msg) func sign(message_hash: Blob) : async { #Ok : { signature: Blob };  #Err : Text } {
     assert(message_hash.size() == 32);
