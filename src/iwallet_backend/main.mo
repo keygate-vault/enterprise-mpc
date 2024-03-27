@@ -9,15 +9,14 @@ import Blob "mo:base/Blob";
 import Buffer "mo:base/Buffer";
 import Hex "mo:encoding.mo/Hex";
 import Nat64 "mo:base/Nat64";
-import evm_rpc "canister:evm_rpc";
 
 actor {
-  public type ProfileError = {
+  public type WalletError = {
     #notFound;
     #conflict;
   };
 
-  public type Profile = {
+  public type Wallet = {
     email : Text;
     name : Text;
     publicKey : Text;
@@ -26,109 +25,36 @@ actor {
   let map = Map.new<Text, Text>();
   type CustodialWallet = Custodial.CustodialWallet;
   let wallets = Map.new<Text, CustodialWallet>();
+  let walletsArray = Buffer.Buffer<Wallet>(0);
 
-  public func getAll() : async [Profile] {
-    let keys = Map.keys(map);
-    let size = Map.size(map);
-    let profiles = Buffer.Buffer<Profile>(size);
-    for (key in keys) {
-      let name = Map.get(map, thash, key);
-      switch (name) {
-        case (?n) {
-          let wallet = Map.get(wallets, thash, key);
-          switch (wallet) {
-            case (?w) {
-              let pubkraw = await w.public_key();
-              let pubk = switch (pubkraw) {
-                case (#Ok(score)) { score.public_key };
-                case (#Err(_)) { Text.encodeUtf8("Error retrieving public key") };
-              };
-              let arrayBuf = Blob.toArray(pubk);
-              profiles.add({
-                name = n;
-                email = key;
-                publicKey = Hex.encode(arrayBuf);
-              });
-            };
-            case (null) {
-              Debug.print("Error: wallet not found for " # key);
-            };
-          };
-        };
-        case (null) {
-          Debug.print("Error: key not found");
-        };
-      };
-    };
-
-    let result = Buffer.toArray(profiles);
+  public func getAll() : async [Wallet] {
+    let result = Buffer.toArray(walletsArray);
     return result;
   };
+  
 
-  public func getGasPrice() : async (Result.Result<Text, evm_rpc.RpcError>) {
-    let rpcService : evm_rpc.RpcService = #Custom({
-      url = "https://cloudflare-eth.com";
-      headers = null;
-    });
-    
-    let payload = "{\"jsonrpc\":\"2.0\",\"method\":\"eth_gasPrice\",\"params\":[],\"id\":1}";
-    let maxResponseBytes : Nat64  = 400;
-    
-    Cycles.add<system>(230000000);
-    
-    let result = await evm_rpc.request(rpcService, payload, maxResponseBytes);
-    switch (result) {
-      case (#Ok(response)) {
-        return #ok(response);
-      };
-      case (#Err(error)) {
-        return #err(error);
-      };
-    }
-  };
-
-  public func getBalance(address : Text) : async (Result.Result<Text, evm_rpc.RpcError>) {
-    let rpcService : evm_rpc.RpcService = #Custom({
-      url = "https://cloudflare-eth.com";
-      headers = null;
-    });
-    
-    let payload = "{\"jsonrpc\":\"2.0\",\"method\":\"eth_getBalance\",\"params\":[\"" # address # "\", \"latest\"],\"id\":1}";
-    let maxResponseBytes : Nat64  = 400;
-    
-    Cycles.add<system>(230000000);
-    
-    let result = await evm_rpc.request(rpcService, payload, maxResponseBytes);
-    switch (result) {
-      case (#Ok(response)) {
-        return #ok(response);
-      };
-      case (#Err(error)) {
-        return #err(error);
-      };
-    }
-  };
-
-  public func register(email : Text, name : Text) : async Result.Result<Profile, ProfileError> {
+  public func register(email : Text, name : Text) : async Result.Result<Wallet, WalletError> {
     let a = Map.put(map, thash, email, name);
     switch (a) {
       case null {
         Cycles.add<system>(100_000_000_000);
-        // icp
         
-        let w = await Custodial.CustodialWallet();
-        let _ = Map.put(wallets, thash, email, w);
-        let pubkraw = await w.public_key();
+        let walletCanister = await Custodial.CustodialWallet();
+        let _ = Map.put(wallets, thash, email, walletCanister);
+        let pubkraw = await walletCanister.public_key();
         let pubk = switch (pubkraw) {
           case (#Ok(score)) { score };
           case (#Err(_)) { return #err(#notFound); };
         };
+
         let arrayBuf = Blob.toArray(pubk.public_key);
-        return #ok({
+        let walletEntity = {
           name = name;
           email = email;
           publicKey = Hex.encode(arrayBuf);
-        });
+        };
+        walletsArray.add(walletEntity);
+        return #ok(walletEntity);
       };
       case (?name) {
         return #err(#conflict);
@@ -136,7 +62,7 @@ actor {
     };
   };
 
-  public query func lookup(email : Text) : async Result.Result<Text, ProfileError> {
+  public query func lookup(email : Text) : async Result.Result<Text, WalletError> {
     let a = Map.get(map, thash, email);
     switch (a) {
       case null {

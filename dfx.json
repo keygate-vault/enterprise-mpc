@@ -6,11 +6,18 @@
     }
   },
   "canisters": {
+    "iwallet_evm": {
+      "main": "src/iwallet_evm/main.mo",
+      "type": "motoko",
+      "dependencies": [
+        "evm_rpc"
+      ]
+    },
     "iwallet_backend": {
       "main": "src/iwallet_backend/main.mo",
       "type": "motoko",
       "dependencies": [
-        "evm_rpc"
+        "iwallet_evm"
       ]
     },
     "iwallet_frontend": {
