@@ -59,7 +59,6 @@ const VaultDetail = () => {
     try {
       setIsLoading(true);
       const vaultsResponse = await iwallet_backend.getVault(id!);
-      const walletsResponse = await iwallet_backend.getWallets(id!);
 
       setVault({
         blockchain: "eth",
@@ -67,6 +66,8 @@ const VaultDetail = () => {
         name: vaultsResponse.ok.name,
         id: id!,
       });
+
+      const walletsResponse = await iwallet_backend.getWallets(id!);
 
       const wallets = await Promise.all(
         walletsResponse.map(async (wallet) => {
@@ -113,25 +114,25 @@ const VaultDetail = () => {
     }
   };
 
-  const publicKeyToBTCAddress = (publicKey: string): string => {
-    try {
-      const sha256Hash = sha3_256(Buffer.from(publicKey, "hex"));
+  // const publicKeyToBTCAddress = (publicKey: string): string => {
+  //   try {
+  //     const sha256Hash = sha3_256(Buffer.from(publicKey, "hex"));
 
-      const ripemd160Hash = CryptoJS.RIPEMD160(sha256Hash).toString(
-        CryptoJS.enc.Hex
-      );
+  //     const ripemd160Hash = CryptoJS.RIPEMD160(sha256Hash).toString(
+  //       CryptoJS.enc.Hex
+  //     );
 
-      const bech32Words = bech32.toWords(Buffer.from(ripemd160Hash, "hex"));
-      const words = new Uint8Array([0, ...bech32Words]);
+  //     const bech32Words = bech32.toWords(Buffer.from(ripemd160Hash, "hex"));
+  //     const words = new Uint8Array([0, ...bech32Words]);
 
-      const address = bech32.encode("bc", words);
+  //     const address = bech32.encode("bc", words);
 
-      return address;
-    } catch (error) {
-      console.error("Error converting to BTC SegWit address:", error);
-      return "";
-    }
-  };
+  //     return address;
+  //   } catch (error) {
+  //     console.error("Error converting to BTC SegWit address:", error);
+  //     return "";
+  //   }
+  // };
 
   return (
     <main className="flex min-h-screen flex-col items-left p-16">

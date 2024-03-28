@@ -7,6 +7,7 @@ import { ConfigProvider } from "antd";
 import CreateWallet from "./pages/Wallets/Create";
 import WalletDetail from "./pages/Wallets/View";
 import VaultDetail from "./pages/Vaults/View";
+import PageLayout from "./PageLayout";
 
 function App() {
   return (
@@ -29,10 +30,12 @@ function App() {
         >
           <div className="w-screen h-full">
             <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/vaults/:id" element={<VaultDetail />} />
-              <Route path="/vaults/" element={<Dashboard />} />
-              <Route path="/wallets/:email" element={<WalletDetail />} />
+              <Route element={<PageLayout />}>
+                <Route path="/" element={<Dashboard />} />
+                <Route path="/vaults/:id" element={<VaultDetail />} />
+                <Route path="/vaults/" element={<Dashboard />} />
+                <Route path="/wallets/:email" element={<WalletDetail />} />
+              </Route>
             </Routes>
           </div>
         </main>
