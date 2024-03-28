@@ -15,6 +15,7 @@ import {
   WalletOutlined,
 } from "@ant-design/icons";
 import CreateWalletModal from "../../Wallets/Create";
+import web3 from "web3";
 
 const { TabPane } = Tabs;
 
@@ -26,8 +27,8 @@ type Vault = {
 
 type Wallet = {
   address: string;
-  balance: number;
-  usdBalance: number;
+  balance: string;
+  usdBalance: string;
 };
 
 const ethLogo = (
@@ -66,14 +67,27 @@ const VaultDetail = () => {
         name: vaultsResponse.ok.name,
         id: id!,
       });
-      setWallets(
-        walletsResponse.map((wallet) => ({
-          address: publicKeyToETHAddress(wallet.publicKey),
-          balance: 32.0,
-          usdBalance: 3323,
-        }))
+
+      const wallets = await Promise.all(
+        walletsResponse.map(async (wallet) => {
+          const ethAddress = publicKeyToETHAddress(wallet.publicKey);
+          const rpcResponse = await iwallet_evm.getBalance(ethAddress);
+          // @ts-expect-error
+          const balanceWei = Number(JSON.parse(rpcResponse.ok).result);
+          const balanceEther = web3.utils.fromWei(balanceWei, "ether");
+          const usdBalance = "3323";
+
+          return {
+            address: ethAddress,
+            balance: balanceEther,
+            usdBalance,
+          };
+        })
       );
+
+      setWallets(wallets);
     } catch (error) {
+      console.error("Error fetching wallet detail:", error);
       api.error({
         message: "Error fetching wallet detail",
         description: "Please try again later.",
@@ -182,18 +196,19 @@ const VaultDetail = () => {
                   </div>
                 )}
 
-                {wallets.map((wallet, index) => (
-                  <div key={index} className="flex items-center mb-4">
-                    {ethLogo}
-                    <div className="ml-4">
-                      <p className="text-gray-500">{wallet.address}</p>
-                      <p className="font-bold">
-                        {wallet.balance} ETH ($
-                        {wallet.usdBalance.toLocaleString()})
-                      </p>
+                {!isLoading &&
+                  wallets.map((wallet, index) => (
+                    <div key={index} className="flex items-center mb-4">
+                      {ethLogo}
+                      <div className="ml-4">
+                        <p className="text-gray-500">{wallet.address}</p>
+                        <p className="font-bold">
+                          {wallet.balance} ETH ($
+                          {wallet.usdBalance.toLocaleString()})
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
               </div>
             </TabPane>
             {/* Other TabPanes */}

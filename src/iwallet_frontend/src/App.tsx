@@ -9,16 +9,6 @@ import WalletDetail from "./pages/Wallets/View";
 import VaultDetail from "./pages/Vaults/View";
 
 function App() {
-  const onSignIn = (values: any) => {
-    console.log("onSignIn", values);
-  };
-
-  const onSignUp = async (values: any) => {
-    console.log("onSignUp", values);
-    const result = await iwallet_backend.register(values.email, values.name);
-    console.log("onSignUp result", result);
-  };
-
   return (
     <BrowserRouter>
       <ConfigProvider
@@ -39,22 +29,6 @@ function App() {
         >
           <div className="w-screen h-full">
             <Routes>
-              <Route
-                path="/sign-in"
-                element={
-                  <div className="flex items-center justify-center h-full">
-                    <SignIn onSignIn={onSignIn} />
-                  </div>
-                }
-              />
-              <Route
-                path="/sign-up"
-                element={
-                  <div className="flex items-center justify-center h-full">
-                    <SignUp onSignUp={onSignUp} />
-                  </div>
-                }
-              />
               <Route path="/" element={<Dashboard />} />
               <Route path="/vaults/:id" element={<VaultDetail />} />
               <Route path="/vaults/" element={<Dashboard />} />

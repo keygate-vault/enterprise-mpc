@@ -36,14 +36,14 @@ actor class Evm() {
 
     public func getBalance(address : Text) : async (Result.Result<Text, evm_rpc.RpcError>) {
         let rpcService : evm_rpc.RpcService = #Custom({
-            url = "https://cloudflare-eth.com";
+            url = "https://rpc.sepolia.org/";
             headers = null;
         });
 
         let payload = "{\"jsonrpc\":\"2.0\",\"method\":\"eth_getBalance\",\"params\":[\"" # address # "\", \"latest\"],\"id\":1}";
-        let maxResponseBytes : Nat64 = 400;
+        let maxResponseBytes : Nat64 = 800;
 
-        Cycles.add<system>(230000000);
+        Cycles.add<system>(1230000000);
 
         let result = await evm_rpc.request(rpcService, payload, maxResponseBytes);
         switch (result) {

@@ -88,13 +88,6 @@ const Dashboard = () => {
           New wallet
         </Button>
       </div>
-      <CreateWalletModal
-        visible={open}
-        setVisible={setOpen}
-        refreshWallets={() => {
-          fetchWallets();
-        }}
-      />
       <Table
         loading={isLoading}
         rowKey="id"

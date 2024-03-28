@@ -22,7 +22,8 @@
     },
     "iwallet_frontend": {
       "dependencies": [
-        "iwallet_backend"
+        "iwallet_backend",
+        "iwallet_evm"
       ],
       "source": [
         "src/iwallet_frontend/dist"
