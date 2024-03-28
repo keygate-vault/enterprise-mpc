@@ -50,29 +50,8 @@ const columns: ColumnProps<Vault>[] = [
   },
 ];
 
-const mockVaults: Vault[] = [
-  {
-    id: "1",
-    name: "Funding",
-    available: "$32.00",
-    blockchains: ["eth", "btc"],
-  },
-  {
-    id: "2",
-    name: "Investments",
-    available: "$1,000.4",
-    blockchains: ["btc"],
-  },
-  {
-    id: "3",
-    name: "Savings",
-    available: "$5,000.2",
-    blockchains: ["eth"],
-  },
-];
-
 const Dashboard = () => {
-  const [dataSource, setDataSource] = useState<Vault[]>(mockVaults);
+  const [dataSource, setDataSource] = useState<Vault[]>([]);
   const [api] = notification.useNotification();
   const [isLoading, setIsLoading] = useState(false);
   const [open, setOpen] = useState(false);
@@ -120,20 +99,6 @@ const Dashboard = () => {
   return (
     <main className="flex min-h-screen flex-col items-left p-16">
       <h1 className="text-3xl font-bold">Vaults</h1>
-      {/* <Alert
-        message="What is a Vault?"
-        description={
-          <>
-            <p>
-              A Vault account is an easy way to separate and maintain security
-              boundaries across assets.
-            </p>
-          </>
-        }
-        type="info"
-        showIcon
-        style={{ marginTop: 16, marginBottom: 16 }}
-      /> */}
       <div className="flex flex-row justify-between">
         <p className="text-lg">Manage and secure your assets.</p>
         <Button

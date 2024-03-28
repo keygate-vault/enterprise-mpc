@@ -8,8 +8,6 @@ import Debug "mo:base/Debug";
 import Blob "mo:base/Blob";
 import Buffer "mo:base/Buffer";
 import Hex "mo:encoding.mo/Hex";
-import Nat64 "mo:base/Nat64";
-import Principal "mo:base/Principal";
 import Source "mo:uuid.mo/async/SourceV4";
 import UUID "mo:uuid.mo/UUID";
 
@@ -68,7 +66,60 @@ actor {
     return result;
   };
 
-  public func register() : async Result.Result<Wallet, WalletError> {
+  public func getVault(vaultId : Text) : async Result.Result<VaultMetadata, Text> {
+    switch (Map.get(vaults, thash, vaultId)) {
+      case null {
+        return #err("Vault not found.");
+      };
+      case (?v) {
+        return #ok(v);
+      };
+    };
+  };
+
+
+  public func getWallets(vaultId : Text) : async [Wallet] {
+    // O(1) lookup
+    let vault = switch (Map.get(vaults, thash, vaultId)) {
+      case null {
+        return [];
+      };
+      case (?v) {
+        let result = Buffer.Buffer<Wallet>(0);
+        // O(n) lookup
+        label walletsF for (walletCanisterId in v.wallets.vals()) {
+          // O(1) lookup
+          let walletCanister = Map.get(wallets, phash, walletCanisterId);
+          switch (walletCanister) {
+            case null {
+              continue walletsF;
+            };
+            case (?w) {
+              let pubkraw = await w.public_key();
+              let pubk = switch (pubkraw) {
+                case (#Ok(score)) { score };
+                case (#Err(_)) { 
+                  continue walletsF;
+                };
+              };
+
+              let arrayBuf = Blob.toArray(pubk.public_key);
+              let walletEntity = {
+                id = walletCanisterId;
+                publicKey = Hex.encode(arrayBuf);
+              };
+              result.add(walletEntity);
+            };
+          };
+        };
+        // O(n)
+        return Buffer.toArray(result);
+      };
+    };
+    return vault;
+  };
+
+  public func register(vaultId: Text) : async Result.Result<Wallet, WalletError> {
       Cycles.add<system>(100_000_000_000);
 
       let walletCanister = await Custodial.CustodialWallet();
@@ -89,6 +140,14 @@ actor {
       };
 
       walletsArray.add(walletEntity);
+
+      let vault = switch (Map.get(vaults, thash, vaultId)) {
+        case null { return #err(#notFound); };
+        case (?v) {
+          v.wallets.add(walletCanisterId);
+        };
+      };
+
       return #ok(walletEntity);
   };
 

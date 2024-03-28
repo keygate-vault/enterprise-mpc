@@ -10,7 +10,9 @@ export default function CreateWalletModal({
   visible,
   setVisible,
   refreshWallets,
+  vaultId,
 }: {
+  vaultId: string;
   visible: boolean;
   setVisible: (visible: boolean) => void;
   refreshWallets: () => void;
@@ -20,7 +22,7 @@ export default function CreateWalletModal({
 
   const handleOk = async () => {
     setLoading(true);
-    await iwallet_backend.register();
+    await iwallet_backend.register(vaultId);
     setVisible(false);
     setLoading(false);
     refreshWallets();

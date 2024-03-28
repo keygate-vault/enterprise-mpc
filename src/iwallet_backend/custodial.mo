@@ -1,7 +1,9 @@
 import Principal "mo:base/Principal";
 import Error "mo:base/Error";
 import Cycles "mo:base/ExperimentalCycles";
-
+import Result "mo:base/Result";
+import Nat64 "mo:base/Nat64";
+import evm_rpc "canister:evm_rpc";
 
 actor class CustodialWallet() = self {
   type IC = actor {
@@ -23,6 +25,28 @@ actor class CustodialWallet() = self {
   public func getId() : async Principal {
     let result = Principal.fromActor(self);
     return result;
+  };
+
+  public shared (msg) func getBalance(address: Text) : async { #Ok : Text;  #Err : Text } {
+    let rpcService : evm_rpc.RpcService = #Custom({
+      url = "https://cloudflare-eth.com";
+      headers = null;
+    });
+
+    let payload = "{\"jsonrpc\":\"2.0\",\"method\":\"eth_getBalance\",\"params\":[\"" # address # "\", \"latest\"],\"id\":1}";
+    let maxResponseBytes : Nat64 = 400;
+
+    Cycles.add<system>(230000000);
+
+    let result = await evm_rpc.request(rpcService, payload, maxResponseBytes);
+    switch (result) {
+        case (#Ok(response)) {
+            return #Ok(response);
+        };
+        case (#Err(error)) {
+            return #Err("Failed to get balance.");
+        };
+    };
   };
 
   public shared (msg) func sign(message_hash: Blob) : async { #Ok : { signature: Blob };  #Err : Text } {
