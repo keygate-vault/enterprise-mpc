@@ -10,6 +10,9 @@ import Buffer "mo:base/Buffer";
 import Hex "mo:encoding.mo/Hex";
 import Nat64 "mo:base/Nat64";
 import Principal "mo:base/Principal";
+import Source "mo:uuid.mo/async/SourceV4";
+import UUID "mo:uuid.mo/UUID";
+
 
 actor {
   public type WalletError = {
@@ -22,13 +25,46 @@ actor {
     publicKey : Text;
   };
 
+  public type Vault = {
+    id : Text;
+    name : Text;
+    wallets : Buffer.Buffer<Principal>;
+  };
+
+  public type VaultMetadata = {
+    id : Text;
+    name : Text;
+  };
+
   let map = Map.new<Text, Text>();
   type CustodialWallet = Custodial.CustodialWallet;
   let wallets = Map.new<Principal, CustodialWallet>();
   let walletsArray = Buffer.Buffer<Wallet>(0);
+  // vault id -> wallets contained
+  // vault id -> vault obj
+  let vaults = Map.new<Text, Vault>();
+  let vaultsArray = Buffer.Buffer<Vault>(0);
 
   public query func getAll() : async [Wallet] {
     let result = Buffer.toArray(walletsArray);
+    return result;
+  };
+
+  public func createVault(name : Text) : async Text {
+    let g = Source.Source();
+    let vaultId = UUID.toText(await g.new());
+    let vault = {
+      id = vaultId;
+      name = name;
+      wallets = Buffer.Buffer<Principal>(0);
+    };
+    let _ = Map.put(vaults, thash, vaultId, vault);
+    vaultsArray.add(vault);
+    return vaultId;
+  };
+
+  public func getVaults() : async [VaultMetadata] {
+    let result = Buffer.toArray(vaultsArray);
     return result;
   };
 

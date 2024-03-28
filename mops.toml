@@ -2,3 +2,4 @@
 base = "0.11.1"
 map = "9.0.1"
 "encoding.mo" = "https://github.com/aviate-labs/encoding.mo#master@2711d18727e954b11afc0d37945608512b5fbce2"
+"uuid.mo" = "https://github.com/aviate-labs/uuid.mo#master@b88101f0516847727ff45ea54688803c698935e5"

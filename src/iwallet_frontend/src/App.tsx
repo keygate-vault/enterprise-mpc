@@ -6,6 +6,7 @@ import Dashboard from "./pages/Dashboard";
 import { ConfigProvider } from "antd";
 import CreateWallet from "./pages/Wallets/Create";
 import WalletDetail from "./pages/Wallets/View";
+import VaultDetail from "./pages/Vaults/View";
 
 function App() {
   const onSignIn = (values: any) => {
@@ -55,6 +56,8 @@ function App() {
                 }
               />
               <Route path="/" element={<Dashboard />} />
+              <Route path="/vaults/:id" element={<VaultDetail />} />
+              <Route path="/vaults/" element={<Dashboard />} />
               <Route path="/wallets/:email" element={<WalletDetail />} />
             </Routes>
           </div>

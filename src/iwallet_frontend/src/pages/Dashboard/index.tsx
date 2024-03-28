@@ -3,6 +3,8 @@ import Table, { ColumnProps } from "antd/es/table";
 import { useEffect, useState } from "react";
 import CreateVaultModal from "../Vaults/Create";
 import { useNavigate } from "react-router-dom";
+import "./index.css";
+import { iwallet_backend } from "../../../../declarations/iwallet_backend";
 
 type Vault = {
   id: string;
@@ -83,17 +85,27 @@ const Dashboard = () => {
   const fetchVaults = async () => {
     try {
       setIsLoading(true);
-      // Simulating an API call with mock data
-      setTimeout(() => {
-        setIsLoading(false);
-        setDataSource(mockVaults);
-      }, 1000);
+      const response = await iwallet_backend.getVaults();
+      const vaults = response.map((vault) => ({
+        id: vault.id,
+        name: vault.name,
+        available: "$32.00",
+        blockchains: ["eth", "btc"],
+      }));
+
+      if (response) {
+        setDataSource(vaults);
+      } else {
+        throw new Error("Error fetching vaults");
+      }
     } catch (error) {
       api.error({
         message: "Error fetching vaults",
         description: "Please try again later.",
         placement: "bottom",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -142,11 +154,11 @@ const Dashboard = () => {
           fetchVaults();
         }}
       />
-      <Card>
+      <Card className="py-2">
         <Table
           loading={isLoading}
           rowKey="id"
-          rowClassName="cursor-pointer"
+          rowClassName="cursor-pointer py-4"
           dataSource={dataSource}
           showHeader={false}
           columns={columns}
