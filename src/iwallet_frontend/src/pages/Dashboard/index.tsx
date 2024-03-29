@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import CreateVaultModal from "../Vaults/Create";
 import { useNavigate } from "react-router-dom";
 import "./index.css";
-import { iwallet_backend } from "../../../../declarations/iwallet_backend";
+import { custodial_backend } from "../../../../declarations/custodial_backend";
 
 type Vault = {
   id: string;
@@ -64,7 +64,7 @@ const Dashboard = () => {
   const fetchVaults = async () => {
     try {
       setIsLoading(true);
-      const response = await iwallet_backend.getVaults();
+      const response = await custodial_backend.get_vaults();
       const vaults = response.map((vault) => ({
         id: vault.id,
         name: vault.name,

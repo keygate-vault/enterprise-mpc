@@ -1,7 +1,7 @@
 "use client";
 import { Button, Checkbox, Form, Input, Modal } from "antd";
 import { useState } from "react";
-import { iwallet_backend } from "../../../../../declarations/iwallet_backend";
+import { custodial_backend } from "../../../../../declarations/custodial_backend";
 
 export default function CreateVaultModal({
   visible,
@@ -19,7 +19,7 @@ export default function CreateVaultModal({
     try {
       setLoading(true);
       const values = await form.validateFields();
-      await iwallet_backend.createVault(values.name);
+      await custodial_backend.create_vault(values.name);
       setVisible(false);
       refreshVaults();
     } catch (error) {

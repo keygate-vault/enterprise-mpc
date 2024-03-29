@@ -1,10 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { iwallet_backend } from "../../declarations/iwallet_backend";
-import { SignIn } from "./components/Forms/SignIn/Index";
-import { SignUp } from "./components/Forms/SignUp/Index";
 import Dashboard from "./pages/Dashboard";
 import { ConfigProvider } from "antd";
-import CreateWallet from "./pages/Wallets/Create";
 import WalletDetail from "./pages/Wallets/View";
 import VaultDetail from "./pages/Vaults/View";
 import PageLayout from "./PageLayout";

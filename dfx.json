@@ -6,24 +6,14 @@
     }
   },
   "canisters": {
-    "iwallet_evm": {
-      "main": "src/iwallet_evm/main.mo",
-      "type": "motoko",
-      "dependencies": [
-        "evm_rpc"
-      ]
-    },
-    "iwallet_backend": {
-      "main": "src/iwallet_backend/main.mo",
-      "type": "motoko",
-      "dependencies": [
-        "iwallet_evm"
-      ]
+    "custodial_backend": {
+      "candid": "src/custodial_backend/custodial_backend.did",
+      "package": "custodial_backend",
+      "type": "rust"
     },
     "iwallet_frontend": {
       "dependencies": [
-        "iwallet_backend",
-        "iwallet_evm"
+        "custodial_backend"
       ],
       "source": [
         "src/iwallet_frontend/dist"
