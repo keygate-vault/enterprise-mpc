@@ -1,14 +1,17 @@
+mod user;
 mod vault;
 mod wallet;
 
 use ic_cdk::{init, query, update};
-use vault::{Vault, Vaults};
-use wallet::{Wallet};
 use std::{cell::RefCell, collections::BTreeMap};
+use user::{User, Users};
+use vault::{Vault, Vaults};
+use wallet::Wallet;
 
 thread_local! {
     static VAULTS: RefCell<Vaults> = RefCell::default();
     static WALLET_WASM: RefCell<Option<Vec<u8>>> = RefCell::new(None);
+    static USERS: RefCell<Users> = RefCell::default();
 }
 
 #[init]
@@ -18,16 +21,12 @@ fn init() {
 
 #[query]
 fn get_vault(id: String) -> Option<Vault> {
-    VAULTS.with(|vaults| {
-        vaults.borrow().get_vault(&id).cloned()
-    })
+    VAULTS.with(|vaults| vaults.borrow().get_vault(&id).cloned())
 }
 
 #[query]
 fn get_vaults() -> BTreeMap<String, Vault> {
-    VAULTS.with(|vaults| {
-        vaults.borrow().vaults.clone()
-    })
+    VAULTS.with(|vaults| vaults.borrow().vaults.clone())
 }
 
 #[update]
@@ -49,9 +48,7 @@ async fn create_vault(name: String) -> Vault {
 #[update]
 async fn create_wallet(name: String, vault_id: String) -> Option<Wallet> {
     // check if vault exists
-    let exists = VAULTS.with(|vaults| {
-        vaults.borrow().get_vault(&vault_id).is_some()
-    });
+    let exists = VAULTS.with(|vaults| vaults.borrow().get_vault(&vault_id).is_some());
 
     if !exists {
         return None;
@@ -66,7 +63,6 @@ async fn create_wallet(name: String, vault_id: String) -> Option<Wallet> {
 
     let wallet = wallet.unwrap();
 
-
     VAULTS.with(|vaults| {
         vaults.borrow_mut().add_wallet(&vault_id, wallet.clone());
     });
@@ -76,9 +72,7 @@ async fn create_wallet(name: String, vault_id: String) -> Option<Wallet> {
 
 #[update]
 async fn get_address(vault_id: String, wallet_id: String) -> Option<String> {
-    let wallet = VAULTS.with(|vaults| {
-        vaults.borrow().get_wallet(&vault_id, &wallet_id).cloned()
-    });
+    let wallet = VAULTS.with(|vaults| vaults.borrow().get_wallet(&vault_id, &wallet_id).cloned());
 
     match wallet {
         Some(mut wallet) => Some(wallet.get_address().await),
@@ -96,9 +90,30 @@ fn load_wallet_wasm() {
 
 #[query]
 fn get_wallet_wasm() -> Vec<u8> {
-    WALLET_WASM.with(|wasm| {
-        wasm.borrow().clone().unwrap()
-    })
+    WALLET_WASM.with(|wasm| wasm.borrow().clone().unwrap())
+}
+
+#[update]
+async fn create_user(email: String, role: String) -> User {
+    let user = User::new(email, role).await;
+
+    let user = user.unwrap();
+
+    USERS.with(|users| {
+        users.borrow_mut().create_user(user.clone());
+    });
+
+    user
+}
+
+#[query]
+fn get_user(id: String) -> Option<User> {
+    USERS.with(|users| users.borrow().get_user(&id).cloned())
+}
+
+#[query]
+fn get_users() -> BTreeMap<String, User> {
+    USERS.with(|users| users.borrow().users.clone())
 }
 
 ic_cdk::export_candid!();

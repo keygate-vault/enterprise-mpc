@@ -3,6 +3,11 @@ type Vault = record {
     name : text;
     wallets : vec record { text; Wallet };
 };
+type User = record {
+    id : text;
+    email : text;
+    role : text;
+};
 type Wallet = record { id : text; name : text; address : text };
 service : () -> {
     create_vault : (text) -> (Vault);
@@ -12,4 +17,7 @@ service : () -> {
     get_vaults : () -> (vec record { text; Vault }) query;
     get_wallet_wasm : () -> (blob) query;
     load_wallet_wasm : () -> ();
+    create_user : (text, text) -> (User);
+    get_user : (text) -> (opt User) query;
+    get_users : () -> (vec record { text; User }) query;
 };

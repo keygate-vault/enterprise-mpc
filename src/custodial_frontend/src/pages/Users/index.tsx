@@ -3,8 +3,7 @@ import { Alert, Button, Card, Modal, notification } from "antd";
 import Table, { ColumnProps } from "antd/es/table";
 import { useEffect, useState } from "react";
 import { CreateUserModal } from "../../components/Users/Create";
-import { useNavigate } from "react-router-dom";
-// import { custodial_backend } from "../../../../declarations/custodial_backend";
+import { custodial_backend } from "../../../../declarations/custodial_backend";
 
 
 type User = {
@@ -37,7 +36,6 @@ const Users = () => {
   const [api] = notification.useNotification();
   const [isLoading, setIsLoading] = useState(false);
   const [open, setOpen] = useState(false);
-  const navigate = useNavigate();
 
   useEffect(() => {
     fetchUsers();
@@ -46,14 +44,14 @@ const Users = () => {
   const fetchUsers = async () => {
     try {
       setIsLoading(true);
-      // const response = await custodial_backend.get_users();
-      const users = [
-        {
-          id: "sfdsdd",
-          email: "sdffd@sdfsdf.com",
-          role: "admin"
-        }
-      ]
+      const response = await custodial_backend.get_users();
+
+      const users = response.map(user => ({
+        id: user[1].id,
+        email: user[1].email,
+        role: user[1].role,
+      }));
+      
       setDataSource(users);
 
     } catch (error) {

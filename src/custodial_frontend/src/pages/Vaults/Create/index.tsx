@@ -22,6 +22,7 @@ export default function CreateVaultModal({
       await custodial_backend.create_vault(values.name);
       setVisible(false);
       refreshVaults();
+      form.resetFields()
     } catch (error) {
       console.error("Error creating vault:", error);
     } finally {

@@ -1,6 +1,6 @@
 import {Button, Form, Input, Modal, Select} from "antd";
 import { useState } from "react";
-// import { custodial_backend } from "../../../../../declarations/custodial_backend";
+import { custodial_backend } from "../../../../../declarations/custodial_backend";
 
 const CreateUserModal = ({
     visible,
@@ -18,10 +18,10 @@ const CreateUserModal = ({
     try {
       setLoading(true);
       const values = await form.validateFields();
-      console.log('vals', values)
-      // await custodial_backend.create_user(values.email, values.role);
+      await custodial_backend.create_user(values.email, values.role);
       setVisible(false);
       refreshUsers();
+      form.resetFields();
     } catch (error) {
       console.error("Error creating user:", error);
     } finally {
@@ -58,7 +58,7 @@ const CreateUserModal = ({
         <Form.Item
           name="email"
           label={<p className="mb-0" style={{ fontSize: "16px" }}>Email</p>}
-          rules={[{ required: true, message: "Please enter an email" }]}
+          rules={[{ required: true, type: "email", message: "Please enter an email" }]}
         >
           <Input size="large" placeholder="e.g. example@example.com" />
         </Form.Item>
