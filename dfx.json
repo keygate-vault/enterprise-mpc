@@ -11,15 +11,15 @@
       "package": "custodial_backend",
       "type": "rust"
     },
-    "iwallet_frontend": {
+    "custodial_frontend": {
       "dependencies": [
         "custodial_backend"
       ],
       "source": [
-        "src/iwallet_frontend/dist"
+        "src/custodial_frontend/dist"
       ],
       "type": "assets",
-      "workspace": "iwallet_frontend"
+      "workspace": "custodial_frontend"
     },
     "evm_rpc": {
       "type": "pull",

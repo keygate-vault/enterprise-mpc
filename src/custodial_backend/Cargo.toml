@@ -13,7 +13,13 @@ candid = "0.10"
 ic-cdk = "0.13"
 ic-cdk-timers = "0.7" # Feel free to remove this dependency if you don't need timers
 rand = { version = "0.8.5", features = ["std"] }
-getrandom = { version = "0.2.12", features = ["js"] }
+getrandom = { version = "0.2.12", features = ["custom"] }
 serde = "1.0.197"
 hex = "0.4.3"
 serde_bytes = "0.11.14"
+ethers-core = "2.0"
+ic-cdk-bindgen = "0.1"
+
+[patch.crates-io]
+wasm-bindgen = { git = "https://github.com/dfinity/wasm-bindgen", rev = "af4023035c9ef832017bcb65502c218382ff61b2" }
+

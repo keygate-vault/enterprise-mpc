@@ -1,7 +1,6 @@
 use candid::{CandidType, Nat, Principal};
 use ic_cdk::{api, caller};
 use serde::{Deserialize, Serialize};
-use std::collections::BTreeMap;
 
 #[derive(CandidType, Deserialize)]
 pub enum InstallMode {
@@ -45,18 +44,62 @@ struct CreateResult {
     canister_id: Principal,
 }
 
+/**
+ * Utility
+ */
+
+ #[derive(CandidType, Deserialize)]
+struct PublicKeyReply {
+    pub public_key: Vec<u8>,
+}
+
+fn pubkey_bytes_to_address(pubkey_bytes: &[u8]) -> String {
+    use ethers_core::k256::elliptic_curve::sec1::ToEncodedPoint;
+    use ethers_core::k256::Secp256k1;
+
+    let key: ethers_core::k256::elliptic_curve::PublicKey<Secp256k1> =
+        ethers_core::k256::elliptic_curve::PublicKey::from_sec1_bytes(pubkey_bytes).expect("failed to parse the public key as SEC1");
+    let point = key.to_encoded_point(false);
+    // we re-encode the key to the decompressed representation.
+    let point_bytes: &[u8] = point.as_bytes();
+    assert_eq!(point_bytes[0], 0x04);
+
+    let hash = ethers_core::utils::keccak256(&point_bytes[1..]);
+    
+    ethers_core::utils::to_checksum(&ethers_core::types::Address::from_slice(&hash[12..32]), None)
+}
+
 #[derive(Default, CandidType, Clone, Deserialize, Serialize)]
 pub struct Wallet {
     pub id: String,
     pub name: String,
-}
-
-#[derive(Default, CandidType, Clone, Deserialize, Serialize)]
-pub struct Wallets {
-    pub wallets: BTreeMap<String, Wallet>,
+    pub address: Option<String>,
 }
 
 impl Wallet {
+    pub async fn get_address(&self) -> String {
+        // call wallet canister (using id)
+        // public_key() -> Result<PublicKeyReply, String>
+        let (pubkey_result,): (Result<PublicKeyReply, String>,) = api::call::call(
+            Principal::from_text(self.id.clone()).unwrap(),
+            "public_key",
+            (),
+        )
+        .await
+        .unwrap();
+        
+        let pubkey_reply = match pubkey_result {
+            Ok(pubkey) => pubkey,
+            Err(e) => {
+                return format!("Failed to get public key: {}", e);
+            }
+        };
+       
+        let addr = pubkey_bytes_to_address(&pubkey_reply.public_key);
+
+        addr
+    }
+
     // cwasoo -> crossaint (also known as wasm)
     pub async fn new(name: String, cwasoo: Vec<u8>) -> Result<Self, String> {
         // Deploy canister
@@ -108,6 +151,8 @@ impl Wallet {
         Ok(Self {
             id: create_result.canister_id.to_text(),
             name,
+            address: None
         })
     }
 }
+

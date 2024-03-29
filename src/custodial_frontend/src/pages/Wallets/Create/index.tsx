@@ -2,6 +2,7 @@
 import { Button, Modal, Typography, Steps } from "antd";
 import { useState } from "react";
 import { iwallet_backend } from "../../../../../declarations/iwallet_backend";
+import { custodial_backend } from "../../../../../declarations/custodial_backend";
 
 const { Title, Paragraph } = Typography;
 const { Step } = Steps;
@@ -22,7 +23,7 @@ export default function CreateWalletModal({
 
   const handleOk = async () => {
     setLoading(true);
-    await iwallet_backend.register(vaultId);
+    await custodial_backend.create_wallet("eth", vaultId);
     setVisible(false);
     setLoading(false);
     refreshWallets();

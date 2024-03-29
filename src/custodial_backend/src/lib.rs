@@ -3,8 +3,8 @@ mod wallet;
 
 use ic_cdk::{init, query, update};
 use vault::{Vault, Vaults};
-use wallet::{Wallet, Wallets};
-use std::cell::RefCell;
+use wallet::{Wallet};
+use std::{cell::RefCell, collections::BTreeMap};
 
 thread_local! {
     static VAULTS: RefCell<Vaults> = RefCell::default();
@@ -24,9 +24,9 @@ fn get_vault(id: String) -> Option<Vault> {
 }
 
 #[query]
-fn get_vaults() -> Vaults {
+fn get_vaults() -> BTreeMap<String, Vault> {
     VAULTS.with(|vaults| {
-        vaults.borrow().clone()
+        vaults.borrow().vaults.clone()
     })
 }
 
@@ -47,14 +47,40 @@ async fn create_vault(name: String) -> Vault {
 }
 
 #[update]
-async fn create_wallet(name: String) -> wallet::Wallet {
-    let wasm = get_wallet_wasm();
-    let wallet = Wallet::new(name, wasm).await;
+async fn create_wallet(name: String, vault_id: String) -> Option<Wallet> {
+    // check if vault exists
+    let exists = VAULTS.with(|vaults| {
+        vaults.borrow().get_vault(&vault_id).is_some()
+    });
+
+    if !exists {
+        return None;
+    }
+
+    let wallet = Wallet::new(name, get_wallet_wasm()).await;
     if let Err(e) = &wallet {
         ic_cdk::trap(&format!("Failed to create wallet: {}", e));
     }
 
-    wallet.unwrap()
+    let wallet = wallet.unwrap();
+
+    VAULTS.with(|vaults| {
+        vaults.borrow_mut().add_wallet(&vault_id, wallet.clone());
+    });
+
+    Some(wallet)
+}
+
+#[query]
+async fn get_address(vault_id: String, wallet_id: String) -> Option<String> {
+    let wallet = VAULTS.with(|vaults| {
+        vaults.borrow().get_wallet(&vault_id, &wallet_id).cloned()
+    });
+
+    match wallet {
+        Some(wallet) => Some(wallet.get_address().await),
+        None => None,
+    }
 }
 
 #[update]

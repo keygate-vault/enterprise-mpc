@@ -1,19 +1,10 @@
-import { Button, Modal, notification, Spin, Tabs } from "antd";
+import { Button, notification, Tabs } from "antd";
 import { useEffect, useState } from "react";
-import { iwallet_backend } from "../../../../../declarations/iwallet_backend";
-import { iwallet_evm } from "../../../../../declarations/iwallet_evm";
+import { custodial_backend } from "../../../../../declarations/custodial_backend";
 import { useNavigate, useParams } from "react-router-dom";
-import { keccak256, sha3_256 } from "js-sha3";
+import { keccak256 } from "js-sha3";
 import { Buffer } from "buffer";
-import RIPEMD160 from "ripemd160";
-import CryptoJS from "crypto-js";
-import { bech32 } from "bech32";
-import {
-  LeftOutlined,
-  PlusOutlined,
-  WalletFilled,
-  WalletOutlined,
-} from "@ant-design/icons";
+import { LeftOutlined, PlusOutlined, WalletFilled } from "@ant-design/icons";
 import CreateWalletModal from "../../Wallets/Create";
 import web3 from "web3";
 
@@ -58,35 +49,23 @@ const VaultDetail = () => {
   const fetchWalletDetail = async () => {
     try {
       setIsLoading(true);
-      const vaultsResponse = await iwallet_backend.getVault(id!);
+      const vaultsResponse = await custodial_backend.get_vault(id!);
+      console.log(vaultsResponse);
 
       setVault({
         blockchain: "eth",
         // @ts-expect-error
-        name: vaultsResponse.ok.name,
+        name: vaultsResponse[0].name,
         id: id!,
       });
 
-      const walletsResponse = await iwallet_backend.getWallets(id!);
+      const wallets = vaultsResponse[0]?.wallets.map((wallet: any) => ({
+        address: wallet.id,
+        balance: "32",
+        usdBalance: "100",
+      }));
 
-      const wallets = await Promise.all(
-        walletsResponse.map(async (wallet) => {
-          const ethAddress = publicKeyToETHAddress(wallet.publicKey);
-          const rpcResponse = await iwallet_evm.getBalance(ethAddress);
-          // @ts-expect-error
-          const balanceWei = Number(JSON.parse(rpcResponse.ok).result);
-          const balanceEther = web3.utils.fromWei(balanceWei, "ether");
-          const usdBalance = "3323";
-
-          return {
-            address: ethAddress,
-            balance: balanceEther,
-            usdBalance,
-          };
-        })
-      );
-
-      setWallets(wallets);
+      setWallets(wallets ?? []);
     } catch (error) {
       console.error("Error fetching wallet detail:", error);
       api.error({
@@ -113,26 +92,6 @@ const VaultDetail = () => {
       throw error;
     }
   };
-
-  // const publicKeyToBTCAddress = (publicKey: string): string => {
-  //   try {
-  //     const sha256Hash = sha3_256(Buffer.from(publicKey, "hex"));
-
-  //     const ripemd160Hash = CryptoJS.RIPEMD160(sha256Hash).toString(
-  //       CryptoJS.enc.Hex
-  //     );
-
-  //     const bech32Words = bech32.toWords(Buffer.from(ripemd160Hash, "hex"));
-  //     const words = new Uint8Array([0, ...bech32Words]);
-
-  //     const address = bech32.encode("bc", words);
-
-  //     return address;
-  //   } catch (error) {
-  //     console.error("Error converting to BTC SegWit address:", error);
-  //     return "";
-  //   }
-  // };
 
   return (
     <main className="flex min-h-screen flex-col items-left p-16">
@@ -199,14 +158,24 @@ const VaultDetail = () => {
 
                 {!isLoading &&
                   wallets.map((wallet, index) => (
-                    <div key={index} className="flex items-center mb-4">
+                    <div key={index} className="flex items-center mt-4 mb-4">
                       {ethLogo}
                       <div className="ml-4">
-                        <p className="text-gray-500">{wallet.address}</p>
-                        <p className="font-bold">
-                          {wallet.balance} ETH ($
-                          {wallet.usdBalance.toLocaleString()})
-                        </p>
+                        {wallet.address && (
+                          <>
+                            <p className="text-gray-500">{wallet.address}</p>
+                            <p className="font-bold">
+                              {wallet.balance} ETH ($
+                              {wallet.usdBalance.toLocaleString()})
+                            </p>
+                          </>
+                        )}
+                        {!wallet.address && (
+                          // reveal address button
+                          <Button type="dashed" size="small">
+                            Reveal address
+                          </Button>
+                        )}
                       </div>
                     </div>
                   ))}

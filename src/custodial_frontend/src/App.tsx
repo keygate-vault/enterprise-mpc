@@ -4,6 +4,7 @@ import { ConfigProvider } from "antd";
 import WalletDetail from "./pages/Wallets/View";
 import VaultDetail from "./pages/Vaults/View";
 import PageLayout from "./PageLayout";
+import React from "react";
 
 function App() {
   return (

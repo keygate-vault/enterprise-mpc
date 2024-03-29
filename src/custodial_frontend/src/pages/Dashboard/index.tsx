@@ -66,8 +66,8 @@ const Dashboard = () => {
       setIsLoading(true);
       const response = await custodial_backend.get_vaults();
       const vaults = response.map((vault) => ({
-        id: vault.id,
-        name: vault.name,
+        id: vault[1].id,
+        name: vault[1].name,
         available: "$32.00",
         blockchains: ["eth", "btc"],
       }));

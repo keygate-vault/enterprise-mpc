@@ -1,5 +1,5 @@
 "use client";
-import { Button, Checkbox, Form, Input, Modal } from "antd";
+import { Button, Form, Input, Modal } from "antd";
 import { useState } from "react";
 import { custodial_backend } from "../../../../../declarations/custodial_backend";
 

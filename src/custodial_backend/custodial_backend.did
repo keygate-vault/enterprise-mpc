@@ -1,10 +1,14 @@
-type Vault = record { id : text; name : text };
-type Vaults = record { vaults : vec record { text; Vault } };
+type Vault = record {
+  id : text;
+  name : text;
+  wallets : vec record { text; Wallet };
+};
+type Wallet = record { id : text; name : text };
 service : () -> {
   create_vault : (text) -> (Vault);
-  create_wallet : (text) -> (Vault);
+  create_wallet : (text, text) -> (opt Wallet);
   get_vault : (text) -> (opt Vault) query;
-  get_vaults : () -> (Vaults) query;
+  get_vaults : () -> (vec record { text; Vault }) query;
   get_wallet_wasm : () -> (blob) query;
   load_wallet_wasm : () -> ();
 }
