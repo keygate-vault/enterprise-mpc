@@ -57,10 +57,10 @@ export default function CreateVaultModal({
       <Form form={form} layout="vertical" requiredMark={false}>
         <Form.Item
           name="name"
-          label={<p style={{ fontSize: "16px" }}>Vault name</p>}
+          label={<p className="mb-0" style={{ fontSize: "16px" }}>Vault name</p>}
           rules={[{ required: true, message: "Please enter an account name" }]}
         >
-          <Input placeholder="e.g. Funding" className="p-5" />
+          <Input size="large" placeholder="e.g. Funding" />
         </Form.Item>
         {/* <Form.Item name="autoFuel" valuePropName="checked"> */}
         {/* consider later: <Checkbox>Auto-fuel using the designated Gas Station vault.</Checkbox> */}

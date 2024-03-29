@@ -125,7 +125,7 @@ const Dashboard = () => {
           rowKey="id"
           rowClassName="cursor-pointer py-4"
           dataSource={dataSource}
-          showHeader={false}
+          showHeader={true}
           columns={columns}
           pagination={false}
           onRow={(record) => ({

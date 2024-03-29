@@ -1,9 +1,9 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Dashboard from "./pages/Dashboard";
 import { ConfigProvider } from "antd";
-import WalletDetail from "./pages/Wallets/View";
-import VaultDetail from "./pages/Vaults/View";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import PageLayout from "./PageLayout";
+import Dashboard from "./pages/Dashboard";
+import VaultDetail from "./pages/Vaults/View";
+import Users from "./pages/Users";
 import React from "react";
 
 function App() {
@@ -31,7 +31,7 @@ function App() {
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/vaults/:id" element={<VaultDetail />} />
                 <Route path="/vaults/" element={<Dashboard />} />
-                <Route path="/wallets/:email" element={<WalletDetail />} />
+                <Route path="/users/" element={<Users />} />
               </Route>
             </Routes>
           </div>
