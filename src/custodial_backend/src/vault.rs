@@ -34,6 +34,7 @@ impl Vault {
     pub fn get_wallet(&self, id: &str) -> Option<&Wallet> {
         self.wallets.get(id)
     }
+    
 }
 
 #[derive(CandidType, Clone, Deserialize, Serialize, Default)]

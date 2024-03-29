@@ -17,7 +17,8 @@ type Vault = {
 };
 
 type Wallet = {
-  address: string;
+  id: string;
+  address?: string;
   balance: string;
   usdBalance: string;
 };
@@ -29,6 +30,7 @@ const ethLogo = (
 const btcLogo = (
   <img src="/public/btc.svg" alt="BTC" className="w-[32px] h-[32px]" />
 );
+
 const VaultDetail = () => {
   const [vault, setVault] = useState<Vault | null>(null);
   const [wallets, setWallets] = useState<Wallet[]>([]);
@@ -59,11 +61,16 @@ const VaultDetail = () => {
         id: id!,
       });
 
+      console.log({ vaultsResponse });
+
       const wallets = vaultsResponse[0]?.wallets.map((wallet: any) => ({
-        address: wallet.id,
+        id: wallet[0],
+        address: wallet[1].address,
         balance: "32",
         usdBalance: "100",
       }));
+
+      console.log({ wallets });
 
       setWallets(wallets ?? []);
     } catch (error) {
@@ -161,21 +168,19 @@ const VaultDetail = () => {
                     <div key={index} className="flex items-center mt-4 mb-4">
                       {ethLogo}
                       <div className="ml-4">
-                        {wallet.address && (
-                          <>
-                            <p className="text-gray-500">{wallet.address}</p>
-                            <p className="font-bold">
-                              {wallet.balance} ETH ($
-                              {wallet.usdBalance.toLocaleString()})
-                            </p>
-                          </>
-                        )}
-                        {!wallet.address && (
-                          // reveal address button
-                          <Button type="dashed" size="small">
-                            Reveal address
-                          </Button>
-                        )}
+                        <div
+                          className={`transition-opacity ease-in duration-200 ${
+                            wallet.address
+                              ? "opacity-100 h-auto"
+                              : "opacity-0 h-0 overflow-hidden"
+                          }`}
+                        >
+                          <p className="text-gray-500">{wallet.address}</p>
+                          <p className="font-bold">
+                            {wallet.balance} ETH ($
+                            {wallet.usdBalance.toLocaleString()})
+                          </p>
+                        </div>
                       </div>
                     </div>
                   ))}

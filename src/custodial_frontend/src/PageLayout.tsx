@@ -7,7 +7,16 @@ const { Sider, Content } = Layout;
 export default function AppLayout() {
   return (
     <Layout style={{ minHeight: "100vh" }}>
-      <Sider width={240} theme="light">
+      <Sider
+        width={240}
+        theme="light"
+        style={{
+          overflow: "auto",
+          height: "100vh",
+          position: "fixed",
+          left: 0,
+        }}
+      >
         <div
           className="logo"
           style={{
@@ -29,7 +38,7 @@ export default function AppLayout() {
         </Menu>
       </Sider>
       <Layout>
-        <Content style={{ margin: "50px" }}>
+        <Content style={{ margin: "50px 50px 50px 240px" }}>
           <div>
             <Outlet />
           </div>

@@ -1,3 +1,5 @@
+use std::borrow::{Borrow, BorrowMut};
+
 use candid::{CandidType, Nat, Principal};
 use ic_cdk::{api, caller};
 use serde::{Deserialize, Serialize};
@@ -69,35 +71,33 @@ fn pubkey_bytes_to_address(pubkey_bytes: &[u8]) -> String {
     ethers_core::utils::to_checksum(&ethers_core::types::Address::from_slice(&hash[12..32]), None)
 }
 
-#[derive(Default, CandidType, Clone, Deserialize, Serialize)]
+#[derive(Default, CandidType, Clone, Deserialize, Serialize, Debug)]
 pub struct Wallet {
     pub id: String,
     pub name: String,
-    pub address: Option<String>,
+    pub address: String,
+}
+
+async fn get_address(id: String) -> String {
+    let (pubkey_result,): (Result<PublicKeyReply, String>,) = ic_cdk::call(Principal::from_text(id.clone()).unwrap(), "public_key", ())
+    .await
+    .unwrap();
+    
+    let pubkey_reply = match pubkey_result {
+        Ok(pubkey) => pubkey,
+        Err(e) => {
+            return format!("Failed to get public key: {}", e);
+        }
+    };
+    
+    let addr = pubkey_bytes_to_address(&pubkey_reply.public_key);
+
+    addr
 }
 
 impl Wallet {
     pub async fn get_address(&self) -> String {
-        // call wallet canister (using id)
-        // public_key() -> Result<PublicKeyReply, String>
-        let (pubkey_result,): (Result<PublicKeyReply, String>,) = api::call::call(
-            Principal::from_text(self.id.clone()).unwrap(),
-            "public_key",
-            (),
-        )
-        .await
-        .unwrap();
-        
-        let pubkey_reply = match pubkey_result {
-            Ok(pubkey) => pubkey,
-            Err(e) => {
-                return format!("Failed to get public key: {}", e);
-            }
-        };
-       
-        let addr = pubkey_bytes_to_address(&pubkey_reply.public_key);
-
-        addr
+        get_address(self.id.to_string()).await
     }
 
     // cwasoo -> crossaint (also known as wasm)
@@ -148,10 +148,13 @@ impl Wallet {
             }
         };
 
+        let id = create_result.canister_id.to_text().clone();
+        let address = get_address(id.clone()).await;
+
         Ok(Self {
-            id: create_result.canister_id.to_text(),
+            id: id,
             name,
-            address: None
+            address: address,
         })
     }
 }
