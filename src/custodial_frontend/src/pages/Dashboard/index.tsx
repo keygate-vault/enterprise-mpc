@@ -65,7 +65,6 @@ const Dashboard = () => {
     try {
       setIsLoading(true);
       const response = await custodial_backend.get_vaults();
-      console.log('penis', response)
       const vaults = response.map((vault) => ({
         id: vault[1].id,
         name: vault[1].name,
