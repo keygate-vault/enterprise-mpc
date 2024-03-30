@@ -5,7 +5,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { keccak256 } from "js-sha3";
 import { Buffer } from "buffer";
 import { LeftOutlined, PlusOutlined, WalletFilled } from "@ant-design/icons";
-import CreateWalletModal from "../../Wallets/Create";
+import CreateWalletModal from "../../../components/Wallets/Create";
 import web3 from "web3";
 
 const { TabPane } = Tabs;

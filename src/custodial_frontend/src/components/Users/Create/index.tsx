@@ -1,17 +1,16 @@
-"use client";
-import { Button, Form, Input, Modal } from "antd";
+import {Button, Form, Input, Modal, Select} from "antd";
 import { useState } from "react";
 import { custodial_backend } from "../../../../../declarations/custodial_backend";
 
-export default function CreateVaultModal({
-  visible,
-  setVisible,
-  refreshVaults,
-}: {
+const CreateUserModal = ({
+    visible,
+    setVisible,
+    refreshUsers,
+  }: {
   visible: boolean;
   setVisible: (visible: boolean) => void;
-  refreshVaults: () => void;
-}) {
+  refreshUsers: () => void;
+}) => {
   const [loading, setLoading] = useState(false);
   const [form] = Form.useForm();
 
@@ -19,12 +18,12 @@ export default function CreateVaultModal({
     try {
       setLoading(true);
       const values = await form.validateFields();
-      await custodial_backend.create_vault(values.name);
+      await custodial_backend.create_user(values.email, values.role);
       setVisible(false);
-      refreshVaults();
-      form.resetFields()
+      refreshUsers();
+      form.resetFields();
     } catch (error) {
-      console.error("Error creating vault:", error);
+      console.error("Error creating user:", error);
     } finally {
       setLoading(false);
     }
@@ -38,7 +37,7 @@ export default function CreateVaultModal({
   return (
     <Modal
       centered
-      title="Create a vault"
+      title="Create a user"
       open={visible}
       onCancel={handleCancel}
       footer={[
@@ -57,16 +56,25 @@ export default function CreateVaultModal({
     >
       <Form form={form} layout="vertical" requiredMark={false}>
         <Form.Item
-          name="name"
-          label={<p className="mb-0" style={{ fontSize: "16px" }}>Vault name</p>}
-          rules={[{ required: true, message: "Please enter an account name" }]}
+          name="email"
+          label={<p className="mb-0" style={{ fontSize: "16px" }}>Email</p>}
+          rules={[{ required: true, type: "email", message: "Please enter an email" }]}
         >
-          <Input size="large" placeholder="e.g. Funding" />
+          <Input size="large" placeholder="e.g. example@example.com" />
         </Form.Item>
-        {/* <Form.Item name="autoFuel" valuePropName="checked"> */}
-        {/* consider later: <Checkbox>Auto-fuel using the designated Gas Station vault.</Checkbox> */}
-        {/* </Form.Item> */}
+        <Form.Item
+          name="role"
+          label={<p className="my-0" style={{ fontSize: "16px" }}>Role</p>}
+          rules={[{ required: true, message: "Please enter a role" }]}
+        >
+          <Select placeholder="Select a role" size="large">
+            <Select.Option value="admin">Admin</Select.Option>
+            <Select.Option value="user">User</Select.Option>
+          </Select>
+        </Form.Item>
       </Form>
     </Modal>
   );
 }
+
+export { CreateUserModal }
