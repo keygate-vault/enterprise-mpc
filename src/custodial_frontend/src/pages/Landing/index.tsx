@@ -1,5 +1,4 @@
 import { Button, Typography } from "antd";
-import { EvervaultCard, Icon } from "../../components/Card/EvervaultCard";
 import useNFID from "../../hooks/useNFID";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
