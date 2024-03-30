@@ -17,13 +17,21 @@
   ],
   "dependencies": {
     "@ant-design/icons": "^5.3.5",
+    "@dfinity/auth-client": "^1.2.0",
+    "@dfinity/identity": "^1.2.0",
+    "@dfinity/principal": "^1.2.0",
+    "@internet-identity-labs/react-ic-ii-auth": "^0.0.19",
+    "@nfid/embed": "^0.10.1-alpha.6",
     "bech32": "^2.0.0",
     "buffer": "^6.0.3",
+    "clsx": "^2.1.0",
     "crypto-js": "^4.2.0",
+    "framer-motion": "^11.0.24",
     "js-sha3": "^0.9.3",
     "react-router-dom": "^6.22.3",
     "readable-stream": "^4.5.2",
     "ripemd160": "^2.0.2",
+    "tailwind-merge": "^2.2.2",
     "web3": "^4.7.0"
   },
   "devDependencies": {

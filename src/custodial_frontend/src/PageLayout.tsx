@@ -1,19 +1,21 @@
 import {Outlet, useLocation, useNavigate} from "react-router-dom";
 import { Layout, Menu } from "antd";
 import { WalletOutlined, CodeOutlined, UserOutlined } from "@ant-design/icons";
+import useAuthGuard from "./hooks/useAuthGuard";
 
 const { Sider, Content } = Layout;
 
 export default function AppLayout() {
-  const navigate = useNavigate()
-  const location = useLocation();;
+  const navigate = useNavigate();
+  const location = useLocation();
+  useAuthGuard();
 
   const getSelectedKey = (path?: string): string => {
-    if (path === '/') return '1';
-    if (path === '/developers') return '2';
-    if (path === '/users') return '3';
+    if (path === "/") return "1";
+    if (path === "/developers") return "2";
+    if (path === "/users") return "3";
 
-    return '1'
+    return "1";
   };
 
   return (
@@ -36,14 +38,27 @@ export default function AppLayout() {
             background: "rgba(255, 255, 255, 0.3)",
           }}
         />
-        <Menu theme="light" mode="inline" defaultSelectedKeys={["1"]}  selectedKeys={[getSelectedKey(location.pathname)]}>
-          <Menu.Item key="1" icon={<WalletOutlined />} onClick={() => navigate('/')}>
+        <Menu
+          theme="light"
+          mode="inline"
+          defaultSelectedKeys={["1"]}
+          selectedKeys={[getSelectedKey(location.pathname)]}
+        >
+          <Menu.Item
+            key="1"
+            icon={<WalletOutlined />}
+            onClick={() => navigate("/vaults")}
+          >
             Vaults
           </Menu.Item>
           <Menu.Item key="2" icon={<CodeOutlined />}>
             Developers
           </Menu.Item>
-          <Menu.Item key="3" icon={<UserOutlined />} onClick={() => navigate('/users')}>
+          <Menu.Item
+            key="3"
+            icon={<UserOutlined />}
+            onClick={() => navigate("/users")}
+          >
             Users
           </Menu.Item>
         </Menu>

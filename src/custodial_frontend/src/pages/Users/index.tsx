@@ -8,7 +8,7 @@ import { custodial_backend } from "../../../../declarations/custodial_backend";
 
 type User = {
   id: string;
-  email: string;
+  label: string;
   role: string;
 };
 
@@ -19,9 +19,9 @@ const columns: ColumnProps<User>[] = [
     key: "id",
   },
   {
-    title: "EMAIL",
-    dataIndex: "email",
-    key: "email",
+    title: "Label",
+    dataIndex: "label",
+    key: "label",
     className: "font-semibold",
   },
   {
@@ -46,14 +46,13 @@ const Users = () => {
       setIsLoading(true);
       const response = await custodial_backend.get_users();
 
-      const users = response.map(user => ({
+      const users = response.map((user) => ({
         id: user[1].id,
-        email: user[1].email,
+        label: user[1].email,
         role: user[1].role,
       }));
-      
-      setDataSource(users);
 
+      setDataSource(users);
     } catch (error) {
       api.error({
         message: "Error fetching users",
@@ -75,9 +74,9 @@ const Users = () => {
 
   return (
     <main className="flex min-h-screen flex-col items-left p-16">
-      <h1 className="text-3xl font-bold">Users</h1>
+      <h1 className="text-3xl font-bold">API Keys</h1>
       <div className="flex flex-row justify-between">
-        <p className="text-lg">Manage users and their roles.</p>
+        <p className="text-lg">Manage keys and their permissions.</p>
         <Button
           type="primary"
           className="mt-4"

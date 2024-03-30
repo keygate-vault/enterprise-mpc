@@ -21,6 +21,7 @@ type Wallet = {
   address?: string;
   balance: string;
   usdBalance: string;
+  balanceLoading: boolean;
 };
 
 const ethLogo = (
@@ -30,7 +31,6 @@ const ethLogo = (
 const btcLogo = (
   <img src="/public/btc.svg" alt="BTC" className="w-[32px] h-[32px]" />
 );
-
 
 const VaultDetail = () => {
   const [vault, setVault] = useState<Vault | null>(null);
@@ -48,6 +48,34 @@ const VaultDetail = () => {
       fetchWalletDetail();
     }
   }, [id, navigate]);
+
+  const loadWalletBalance = async (walletId: string) => {
+    try {
+      const balance = await custodial_backend.get_balance(id!, walletId);
+      const balanceStr = balance.toString();
+      const usdBalance = web3.utils.fromWei(balance.toString(), "ether");
+
+      setWallets((prevWallets) =>
+        prevWallets.map((wallet) =>
+          wallet.id === walletId
+            ? {
+                ...wallet,
+                balance: balanceStr,
+                usdBalance,
+                balanceLoading: false,
+              }
+            : wallet
+        )
+      );
+    } catch (error) {
+      console.error(`Error fetching balance for wallet ${walletId}:`, error);
+      setWallets((prevWallets) =>
+        prevWallets.map((wallet) =>
+          wallet.id === walletId ? { ...wallet, balanceLoading: false } : wallet
+        )
+      );
+    }
+  };
 
   const fetchWalletDetail = async () => {
     try {
@@ -67,13 +95,21 @@ const VaultDetail = () => {
       const wallets = vaultsResponse[0]?.wallets.map((wallet: any) => ({
         id: wallet[0],
         address: wallet[1].address,
-        balance: "32",
-        usdBalance: "100",
+        balance: "0",
+        usdBalance: "0",
+        balanceLoading: true,
       }));
 
       console.log({ wallets });
 
-      setWallets(wallets ?? []);
+      const walletsArray = wallets ?? [];
+
+      setWallets(walletsArray);
+
+      // Start loading balances for each wallet
+      walletsArray.forEach((wallet) => {
+        loadWalletBalance(wallet.id);
+      });
     } catch (error) {
       console.error("Error fetching wallet detail:", error);
       api.error({
@@ -83,21 +119,6 @@ const VaultDetail = () => {
       });
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const publicKeyToETHAddress = (publicKey: string): string => {
-    try {
-      const trimmedPublicKey = publicKey.startsWith("0x")
-        ? publicKey.slice(2)
-        : publicKey;
-
-      const hash = keccak256(Buffer.from(trimmedPublicKey, "hex"));
-
-      return `0x${hash.slice(-40)}`;
-    } catch (error) {
-      console.error("Error converting to ETH address:", error);
-      throw error;
     }
   };
 
@@ -177,10 +198,17 @@ const VaultDetail = () => {
                           }`}
                         >
                           <p className="text-gray-500">{wallet.address}</p>
-                          <p className="font-bold">
-                            {wallet.balance} ETH ($
-                            {wallet.usdBalance.toLocaleString()})
-                          </p>
+                          {wallet.balanceLoading ? (
+                            <p className="animate-pulse h-4 bg-gray-300 w-[100px]"></p>
+                          ) : (
+                            <p className="font-bold">
+                              {web3.utils
+                                .fromWei(wallet.balance, "ether")
+                                .replaceAll(".", "")}{" "}
+                              ETH ($
+                              {parseFloat(wallet.usdBalance).toLocaleString()})
+                            </p>
+                          )}
                         </div>
                       </div>
                     </div>

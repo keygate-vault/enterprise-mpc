@@ -76,7 +76,7 @@ async fn create_wallet(name: String, vault_id: String) -> Option<Wallet> {
     Some(wallet)
 }
 
-#[update]
+#[update(composite = true)]
 async fn get_balance(vault_id: String, wallet_id: String) -> Option<u128> {
     let wallet = VAULTS.with(|vaults| {
         vaults.borrow().get_wallet(&vault_id, &wallet_id).cloned()
