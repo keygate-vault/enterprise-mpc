@@ -9,7 +9,8 @@ const useAuthGuard = () => {
 
   useEffect(() => {
     const checkAuth = () => {
-      if (!isAuthenticated && !isAuthLoading) {
+      if (!isAuthenticated && isAuthLoading) {
+        console.log("Not Authenticated");
         navigate("/");
       }
     };

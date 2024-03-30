@@ -6,12 +6,18 @@ import { useEffect } from "react";
 const { Title, Paragraph } = Typography;
 
 const Landing = () => {
-  const { nfid } = useNFID();
-  const navigate = useNavigate();
+    const { isAuthenticated, isAuthLoading, nfid } = useNFID();
 
-  useEffect(() => {
-    login();
-  });
+    const navigate = useNavigate();
+
+    useEffect(() => {
+      if (isAuthenticated && !isAuthLoading) {
+        console.log("Authenticated");
+        navigate("/vaults");
+      }
+
+      login();
+    });
 
   const login = async () => {
     if (nfid) {
