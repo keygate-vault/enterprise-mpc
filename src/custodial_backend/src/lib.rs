@@ -1,9 +1,10 @@
+mod rpc;
 mod vault;
 mod wallet;
 
-use ic_cdk::{init, query, update};
+use ic_cdk::{init, post_upgrade, query, update};
 use vault::{Vault, Vaults};
-use wallet::{Wallet};
+use wallet::Wallet;
 use std::{cell::RefCell, collections::BTreeMap};
 
 thread_local! {
@@ -13,6 +14,11 @@ thread_local! {
 
 #[init]
 fn init() {
+    load_wallet_wasm();
+}
+
+#[post_upgrade]
+fn post_upgrade() {
     load_wallet_wasm();
 }
 
@@ -66,13 +72,25 @@ async fn create_wallet(name: String, vault_id: String) -> Option<Wallet> {
 
     let wallet = wallet.unwrap();
 
-
     VAULTS.with(|vaults| {
         vaults.borrow_mut().add_wallet(&vault_id, wallet.clone());
     });
 
     Some(wallet)
 }
+
+#[update]
+async fn get_balance(vault_id: String, wallet_id: String) -> Option<u128> {
+    let wallet = VAULTS.with(|vaults| {
+        vaults.borrow().get_wallet(&vault_id, &wallet_id).cloned()
+    });
+
+    match wallet {
+        Some(mut wallet) => Some(wallet.get_balance().await),
+        None => None,
+    }
+}
+
 
 #[update]
 async fn get_address(vault_id: String, wallet_id: String) -> Option<String> {

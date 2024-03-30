@@ -31,6 +31,7 @@ const btcLogo = (
   <img src="/public/btc.svg" alt="BTC" className="w-[32px] h-[32px]" />
 );
 
+
 const VaultDetail = () => {
   const [vault, setVault] = useState<Vault | null>(null);
   const [wallets, setWallets] = useState<Wallet[]>([]);

@@ -1,0 +1,2 @@
+[env]
+CANISTER_CANDID_PATH_EVM_RPC_STAGING = { value "src/declarations", relative = true }

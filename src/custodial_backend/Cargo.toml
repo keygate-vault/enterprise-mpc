@@ -19,7 +19,14 @@ hex = "0.4.3"
 serde_bytes = "0.11.14"
 ethers-core = "2.0"
 ic-cdk-bindgen = "0.1"
+cketh-common = { git = "https://github.com/dfinity/ic", package = "ic-cketh-minter" }
+ic-interfaces-adapter-client  = { git = "https://github.com/dfinity/ic", package = "ic-interfaces-adapter-client" }
+ic-stable-structures = "0.6.3"
 
 [patch.crates-io]
 wasm-bindgen = { git = "https://github.com/dfinity/wasm-bindgen", rev = "af4023035c9ef832017bcb65502c218382ff61b2" }
+
+[build-dependencies]
+ic-cdk-bindgen = "0.1"
+candid_parser = "0.1.4"
 

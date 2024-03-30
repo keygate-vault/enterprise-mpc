@@ -66,15 +66,15 @@ export default function CreateWalletModal({
       content: (
         <div>
           <Paragraph>
-            Here are some key benefits of using custodial wallets:
+            Here are some key benefits of using MPC wallets.
           </Paragraph>
           <ul>
-            <li>Enhanced security through centralized key management</li>
+            <li>Enhanced security through distributed transaction signing.</li>
             <li>
-              Simplified user experience for interacting with digital assets
+              Simplified user experience for interacting with digital assets.
             </li>
-            <li>Seamless integration with your existing infrastructure</li>
-            <li>Reduced complexity and development effort</li>
+            <li>Seamless integration with your existing infrastructure.</li>
+            <li>No need to worry about private keys leaking.</li>
           </ul>
         </div>
       ),
@@ -87,17 +87,14 @@ export default function CreateWalletModal({
             You are now ready to generate your new custodial wallet. Please
             review the following information before proceeding:
           </Paragraph>
-          <ul>
+          <ul className="space-y-5 my-5">
             <li>
-              The generated wallet will be securely stored and managed by our
-              system
+              The generated wallet will be securely stored and managed by the
+              ICP protocol.
             </li>
             <li>
               You will receive an API key and documentation to interact with the
-              wallet
-            </li>
-            <li>
-              The wallet's private key will be encrypted and kept confidential
+              wallet.
             </li>
           </ul>
           <Paragraph>
