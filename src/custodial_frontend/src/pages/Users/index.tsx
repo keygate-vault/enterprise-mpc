@@ -15,7 +15,7 @@ type User = {
 
 const Users = () => {
   const [dataSource, setDataSource] = useState<User[]>([]);
-  const [api] = notification.useNotification();
+  const [api, contextHolder] = notification.useNotification();
   const [isLoading, setIsLoading] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -90,6 +90,7 @@ const Users = () => {
 
   const activateUser = async (userId: string) => {
     try {
+      console.log("Activating user", userId);
       await custodial_backend.set_user_status(userId, "active");
       api.success({
         message: "User activated",
@@ -114,6 +115,7 @@ const Users = () => {
         id: user[1].id,
         username: user[1].username,
         role: user[1].role,
+        status: user[1].status,
       }));
       setDataSource(users);
     } catch (error) {
@@ -137,6 +139,7 @@ const Users = () => {
 
   return (
     <main className="flex min-h-screen flex-col items-left p-16">
+      {contextHolder}
       <h1 className="text-3xl font-bold">Users</h1>
       <div className="flex flex-row justify-between">
         <p className="text-lg">Manage users and their permissions.</p>

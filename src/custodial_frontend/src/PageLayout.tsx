@@ -48,7 +48,7 @@ export default function AppLayout() {
     }
 
     if (superadmin.toString() !== user.toString()) {
-      navigate("/request-access");
+      navigate("/");
     }
   };
 

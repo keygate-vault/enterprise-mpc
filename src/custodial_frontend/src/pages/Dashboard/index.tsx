@@ -66,7 +66,7 @@ const Dashboard = () => {
       const superadmin = await custodial_backend.superadmin();
       console.log("Superadmin:", superadmin);
       if (superadmin.length === 0) {
-        navigate("/request-access");
+        navigate("/");
       }
 
       setIsLoading(true);

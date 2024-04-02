@@ -11,18 +11,9 @@ pub struct User {
 }
 
 impl User {
-    pub async fn new(username: String, role: String) -> Result<Self, String> {
-        let (bytes,): (Vec<u8>,) = ic_cdk::call(
-            Principal::management_canister(),
-            "raw_rand",
-            (),
-        )
-        .await
-        .map_err(|e| format!("Failed to generate random ID."))?;
-
-        let id = hex::encode(bytes);
+    pub async fn new(id: Principal, username: String, role: String) -> Result<Self, String> {
         let status = "active".to_string(); // Set default status to "active"
-        Ok(Self { id, username, role, status })
+        Ok(Self { id: id.to_string(), username, role, status })
     }
 }
 

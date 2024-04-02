@@ -8,7 +8,7 @@ use ic_cdk::{api::{self, management_canister::{self, main::{CanisterSettings, Cr
 use vault::{Vault, Vaults};
 use wallet::Wallet;
 use user::{User, Users};
-use std::{cell::RefCell, collections::BTreeMap};
+use std::{cell::RefCell, collections::BTreeMap, str::FromStr};
 
 thread_local! {
     static VAULTS: RefCell<Vaults> = RefCell::default();
@@ -117,13 +117,24 @@ fn get_wallet_wasm() -> Vec<u8> {
 
 #[update]
 async fn create_user(username: String, role: String) -> User {
-    let user = User::new(username, role).await;
+    let caller = ic_cdk::caller();
+    let mut is_super = false;
+    if SUPERADMIN.with(|superadmin| superadmin.borrow().is_none()) {
+        is_super = true;
+        SUPERADMIN.with(|superadmin| {
+            *superadmin.borrow_mut() = Some(caller);
+        });
+    }
+
+    let use_role = if is_super { String::from_str("superadmin") } else { Ok(role.clone()) };
+    let user = User::new(caller, username, use_role.unwrap()).await;
 
     let user = user.unwrap();
 
     USERS.with(|users| {
         users.borrow_mut().create_user(user.clone());
     });
+
 
     user
 }

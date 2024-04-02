@@ -19,18 +19,15 @@ const Onramp = () => {
   const handleSubmit = async (values: any) => {
     console.log("Form values:", values);
     await login();
+    console.log("logged in");
     setLoading(true);
     try {
       const username = values.username;
       const role = "user"; // Set the default role as "user"
 
       // Call the create_user function from the backend canister
-      const user = await custodial_backend.create_user(username, role);
-      console.log("User created:", user);
-
-      console.log("User created:", user);
-      setVisible(false);
-      setRequestSent(true);
+      const user = await actor!.create_user(username, role);
+      navigate("/vaults");
     } catch (error) {
       console.error("Setup error:", error);
       api.error({
@@ -54,7 +51,7 @@ const Onramp = () => {
         visible={visible}
         title={<div>Platform setup</div>}
         footer={null}
-        closable={false}
+        closable={true}
         centered
         maskStyle={{ backgroundColor: "rgba(0, 0, 0, 0.6)" }}
       >
