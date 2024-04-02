@@ -7,26 +7,68 @@ import { custodial_backend } from "../../../../declarations/custodial_backend";
 
 type User = {
   id: string;
-  label: string;
+  username: string;
   role: string;
 };
 
 const columns: ColumnProps<User>[] = [
   {
-    title: "ID",
-    dataIndex: "id",
-    key: "id",
-  },
-  {
-    title: "Label",
-    dataIndex: "label",
-    key: "label",
-    className: "font-semibold",
+    title: "USERNAME",
+    dataIndex: "username",
+    key: "username",
+    width: 200,
+    render: (username) => <p className="text-sm">{username}</p>,
   },
   {
     title: "ROLE",
     dataIndex: "role",
     key: "role",
+    width: 100,
+    render: (role) => {
+      let color;
+      switch (role) {
+        case "admin":
+          color = "red";
+          break;
+        case "manager":
+          color = "orange";
+          break;
+        case "user":
+          color = "green";
+          break;
+        default:
+          color = "blue";
+      }
+      return (
+        <Alert
+          message={role}
+          showIcon
+          className="text-sm capitalize text-center"
+        />
+      );
+    },
+  },
+  {
+    title: "STATUS",
+    dataIndex: "status",
+    key: "status",
+    width: 100,
+    render: (status) => (
+      <Alert
+        message={status === "active" ? "Active" : "Inactive"}
+        type={status === "active" ? "success" : "error"}
+        showIcon
+      />
+    ),
+  },
+  {
+    title: "ACTIONS",
+    key: "actions",
+    render: (text, record) => (
+      <Button type="link" className="text-blue-500">
+        Activate
+      </Button>
+    ),
   },
 ];
 
@@ -46,7 +88,7 @@ const Users = () => {
       const response = await custodial_backend.get_users();
       const users = response.map((user) => ({
         id: user[1].id,
-        label: user[1].email,
+        username: user[1].username,
         role: user[1].role,
       }));
       setDataSource(users);

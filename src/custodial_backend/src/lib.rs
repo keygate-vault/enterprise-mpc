@@ -3,7 +3,8 @@ mod vault;
 mod wallet;
 mod user;
 
-use ic_cdk::{init, post_upgrade, query, update};
+use candid::Principal;
+use ic_cdk::{api::{self, management_canister::{self, main::{CanisterSettings, CreateCanisterArgument, UpdateSettingsArgument}}}, init, post_upgrade, query, update};
 use vault::{Vault, Vaults};
 use wallet::Wallet;
 use user::{User, Users};
@@ -13,6 +14,8 @@ thread_local! {
     static VAULTS: RefCell<Vaults> = RefCell::default();
     static WALLET_WASM: RefCell<Option<Vec<u8>>> = RefCell::new(None);
     static USERS: RefCell<Users> = RefCell::default();
+    static INITIALIZED: RefCell<bool> = RefCell::new(false);
+    static SUPERADMIN: RefCell<Option<Principal>> = RefCell::new(None);
 }
 
 #[init]
@@ -113,8 +116,8 @@ fn get_wallet_wasm() -> Vec<u8> {
 }
 
 #[update]
-async fn create_user(email: String, role: String) -> User {
-    let user = User::new(email, role).await;
+async fn create_user(username: String, role: String) -> User {
+    let user = User::new(username, role).await;
 
     let user = user.unwrap();
 
@@ -133,6 +136,48 @@ fn get_user(id: String) -> Option<User> {
 #[query]
 fn get_users() -> BTreeMap<String, User> {
     USERS.with(|users| users.borrow().users.clone())
+}
+
+#[update]
+fn set_user_status(id: String, status: String) {
+    let caller = ic_cdk::caller();
+    if caller != SUPERADMIN.with(|superadmin| superadmin.borrow().clone().unwrap()) {
+        ic_cdk::trap("Only superadmin can set user status");
+    }
+    
+    USERS.with(|users| {
+        users.borrow_mut().set_user_status(&id, status);
+    });
+}
+
+#[update]
+async fn setup() -> Principal {
+    if INITIALIZED.with(|initialized| *initialized.borrow()) {
+        ic_cdk::trap("Already initialized");
+    }
+
+    let caller : Principal = ic_cdk::api::caller();
+    SUPERADMIN.with(|superadmin| {
+        *superadmin.borrow_mut() = Some(caller);
+    });
+
+    INITIALIZED.with(|initialized| {
+        *initialized.borrow_mut() = true;
+    });
+
+    caller
+}
+
+#[query]
+fn whoami() -> Principal {
+    return ic_cdk::api::caller();
+}
+
+#[query]
+fn superadmin() -> Option<Principal> {
+    return SUPERADMIN.with(|superadmin| {
+        superadmin.borrow().clone()
+    });
 }
 
 ic_cdk::export_candid!();

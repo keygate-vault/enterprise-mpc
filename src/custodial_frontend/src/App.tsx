@@ -5,9 +5,8 @@ import Dashboard from "./pages/Dashboard";
 import VaultDetail from "./pages/Vaults/View";
 import Users from "./pages/Users";
 import React from "react";
-import useAuthGuard from "./hooks/useAuthGuard";
 import SignIn from "./pages/Auth/SignIn";
-import Landing from "./pages/Landing";
+import Onramp from "./pages/Onramp";
 
 function App() {
   return (
@@ -30,7 +29,7 @@ function App() {
         >
           <div className="w-screen h-full">
             <Routes>
-              <Route path="/" element={<Landing />} />
+              <Route path="/" element={<Onramp />} />
               <Route path="/sign-in/" element={<SignIn />} />
               <Route element={<PageLayout />}>
                 <Route path="/vaults" element={<Dashboard />} />

@@ -18,7 +18,7 @@ const CreateUserModal = ({
     try {
       setLoading(true);
       const values = await form.validateFields();
-      await custodial_backend.create_user(values.email, values.role);
+      await custodial_backend.create_user(values.username, values.role);
       setVisible(false);
       refreshUsers();
       form.resetFields();
@@ -54,21 +54,31 @@ const CreateUserModal = ({
         </Button>,
       ]}
     >
-      <Form form={form} layout="vertical" requiredMark={false}>
+      <Form
+        form={form}
+        className="flex flex-col"
+        layout="vertical"
+        requiredMark={false}
+      >
         <Form.Item
-          name="email"
-          label={<p className="mb-0" style={{ fontSize: "16px" }}>Email</p>}
-          rules={[{ required: true, type: "email", message: "Please enter an email" }]}
+          name="username"
+          label={<p className="mb-0">Username</p>}
+          rules={[{ required: true, message: "Please enter a username" }]}
         >
-          <Input size="large" placeholder="e.g. example@example.com" />
+          <Input placeholder="e.g johnstewart" />
         </Form.Item>
         <Form.Item
           name="role"
-          label={<p className="my-0" style={{ fontSize: "16px" }}>Role</p>}
+          label={<p className="my-0">Role</p>}
           rules={[{ required: true, message: "Please enter a role" }]}
         >
-          <Select placeholder="Select a role" size="large">
-            <Select.Option value="admin">Admin</Select.Option>
+          <Select
+            placeholder="Select a role"
+            dropdownStyle={{
+              padding: "10px",
+            }}
+          >
+            <Select.Option value="admin">Administrator</Select.Option>
             <Select.Option value="user">User</Select.Option>
           </Select>
         </Form.Item>
