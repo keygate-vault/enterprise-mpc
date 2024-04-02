@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { Modal, Form, Input, Button, Progress } from "antd";
+import { Modal, Form, Input, Button, Progress, notification } from "antd";
 import useIdentity from "../../hooks/useIdentity";
 import { useNavigate } from "react-router-dom";
+import { custodial_backend } from "../../../../declarations/custodial_backend";
 
 const Onramp = () => {
   const [visible, setVisible] = useState(true);
@@ -9,6 +10,7 @@ const Onramp = () => {
   const [requestSent, setRequestSent] = useState(false);
   const { actor, login, initIdentity } = useIdentity();
   const navigate = useNavigate();
+  const [api] = notification.useNotification();
 
   useEffect(() => {
     initIdentity();
@@ -19,10 +21,23 @@ const Onramp = () => {
     await login();
     setLoading(true);
     try {
+      const username = values.username;
+      const role = "user"; // Set the default role as "user"
+
+      // Call the create_user function from the backend canister
+      const user = await custodial_backend.create_user(username, role);
+      console.log("User created:", user);
+
+      console.log("User created:", user);
       setVisible(false);
       setRequestSent(true);
     } catch (error) {
       console.error("Setup error:", error);
+      api.error({
+        message: "Error creating user",
+        description: "Please try again later.",
+        placement: "bottom",
+      });
     } finally {
       setLoading(false);
     }
@@ -58,7 +73,6 @@ const Onramp = () => {
           </Form.Item>
         </Form>
       </Modal>
-
       <Modal
         visible={requestSent}
         title="Request Sent"

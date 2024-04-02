@@ -11,66 +11,7 @@ type User = {
   role: string;
 };
 
-const columns: ColumnProps<User>[] = [
-  {
-    title: "USERNAME",
-    dataIndex: "username",
-    key: "username",
-    width: 200,
-    render: (username) => <p className="text-sm">{username}</p>,
-  },
-  {
-    title: "ROLE",
-    dataIndex: "role",
-    key: "role",
-    width: 100,
-    render: (role) => {
-      let color;
-      switch (role) {
-        case "admin":
-          color = "red";
-          break;
-        case "manager":
-          color = "orange";
-          break;
-        case "user":
-          color = "green";
-          break;
-        default:
-          color = "blue";
-      }
-      return (
-        <Alert
-          message={role}
-          showIcon
-          className="text-sm capitalize text-center"
-        />
-      );
-    },
-  },
-  {
-    title: "STATUS",
-    dataIndex: "status",
-    key: "status",
-    width: 100,
-    render: (status) => (
-      <Alert
-        message={status === "active" ? "Active" : "Inactive"}
-        type={status === "active" ? "success" : "error"}
-        showIcon
-      />
-    ),
-  },
-  {
-    title: "ACTIONS",
-    key: "actions",
-    render: (text, record) => (
-      <Button type="link" className="text-blue-500">
-        Activate
-      </Button>
-    ),
-  },
-];
+
 
 const Users = () => {
   const [dataSource, setDataSource] = useState<User[]>([]);
@@ -78,9 +19,92 @@ const Users = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [open, setOpen] = useState(false);
 
+  const columns: ColumnProps<User>[] = [
+    {
+      title: "USERNAME",
+      dataIndex: "username",
+      key: "username",
+      width: 200,
+      render: (username) => <p className="text-sm">{username}</p>,
+    },
+    {
+      title: "ROLE",
+      dataIndex: "role",
+      key: "role",
+      width: 100,
+      render: (role) => {
+        let color;
+        switch (role) {
+          case "admin":
+            color = "red";
+            break;
+          case "manager":
+            color = "orange";
+            break;
+          case "user":
+            color = "green";
+            break;
+          default:
+            color = "blue";
+        }
+        return (
+          <Alert
+            message={role}
+            showIcon
+            className="text-sm capitalize text-center"
+          />
+        );
+      },
+    },
+    {
+      title: "STATUS",
+      dataIndex: "status",
+      key: "status",
+      width: 100,
+      render: (status) => (
+        <Alert
+          message={status === "active" ? "Active" : "Inactive"}
+          type={status === "active" ? "success" : "error"}
+          showIcon
+        />
+      ),
+    },
+    {
+      title: "ACTIONS",
+      key: "actions",
+      render: (text, record) => (
+        <Button
+          type="link"
+          className="text-blue-500"
+          onClick={() => activateUser(record.id)}
+        >
+          Activate
+        </Button>
+      ),
+    },
+  ];
+
   useEffect(() => {
     fetchUsers();
   }, []);
+
+  const activateUser = async (userId: string) => {
+    try {
+      await custodial_backend.set_user_status(userId, "active");
+      api.success({
+        message: "User activated",
+        description: "The user status has been set to active.",
+        placement: "bottom",
+      });
+      fetchUsers(); // Refresh the user list after activation
+    } catch (error) {
+      api.error({
+        message: "Error activating user",
+        description: "Please try again later.",
+        placement: "bottom",
+      });
+    }
+  };
 
   const fetchUsers = async () => {
     try {
@@ -119,6 +143,7 @@ const Users = () => {
         <Button
           type="primary"
           className="mt-4"
+          disabled={true}
           onClick={() => {
             showModal();
           }}

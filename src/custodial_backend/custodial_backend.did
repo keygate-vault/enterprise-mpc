@@ -1,4 +1,4 @@
-type User = record { id : text; username : text; role : text };
+type User = record { id : text; status : text; username : text; role : text };
 type Vault = record {
   id : text;
   name : text;
@@ -17,6 +17,7 @@ service : () -> {
   get_vaults : () -> (vec record { text; Vault }) query;
   get_wallet_wasm : () -> (blob) query;
   load_wallet_wasm : () -> ();
+  set_user_status : (text, text) -> ();
   setup : () -> (principal);
   superadmin : () -> (opt principal) query;
   whoami : () -> (principal) query;
