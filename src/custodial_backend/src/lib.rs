@@ -118,6 +118,11 @@ fn get_wallet_wasm() -> Vec<u8> {
 #[update]
 async fn create_user(username: String, role: String) -> User {
     let caller = ic_cdk::caller();
+
+    if caller == Principal::anonymous() {
+        ic_cdk::trap("Cannot create user anonymously. Please log in.");
+    }
+
     let mut is_super = false;
     if SUPERADMIN.with(|superadmin| superadmin.borrow().is_none()) {
         is_super = true;
@@ -152,6 +157,7 @@ fn get_users() -> BTreeMap<String, User> {
 #[update]
 fn set_user_status(id: String, status: String) {
     let caller = ic_cdk::caller();
+    
     if caller != SUPERADMIN.with(|superadmin| superadmin.borrow().clone().unwrap()) {
         ic_cdk::trap("Only superadmin can set user status");
     }

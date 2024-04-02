@@ -144,7 +144,7 @@ const WalletDetail = () => {
 
   useEffect(() => {
     if (!email) {
-      navigate("/");
+      // navigate("/");
     } else {
       fetchWalletDetail();
     }

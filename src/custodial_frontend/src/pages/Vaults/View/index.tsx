@@ -43,7 +43,7 @@ const VaultDetail = () => {
 
   useEffect(() => {
     if (!id) {
-      navigate("/");
+      // navigate("/");
     } else {
       fetchWalletDetail();
     }

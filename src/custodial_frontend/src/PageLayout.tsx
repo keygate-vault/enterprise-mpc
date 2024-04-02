@@ -29,6 +29,7 @@ export default function AppLayout() {
   const [dropdownVisible, setDropdownVisible] = useState(false);
   const [userProfileModalVisible, setUserProfileModalVisible] = useState(false);
   const [user, setUser] = useState<User | null>(null);
+  const [superadmin, setSuperadmin] = useState<boolean>(false);
 
   const getSelectedKey = (path?: string): string => {
     if (path === "/") return "1";
@@ -69,14 +70,39 @@ export default function AppLayout() {
     }
   };
 
+  const handleLogin = async () => {
+    await login();
+    setUserDetails();
+  };
+
+  useEffect(() => {
+    if (actor) {
+      setUserDetails();
+      checkSuperadmin();
+    }
+  }, [actor]);
+
+  const checkSuperadmin = async () => {
+    const superadmin = await actor?.superadmin();
+    setSuperadmin(!!superadmin && superadmin.length > 0);
+    console.log("Superadmin:", superadmin);
+    if (!superadmin || superadmin.length === 0) {
+      navigate("/");
+    }
+  };
+
   const setUserDetails = async () => {
-    console.log("Getting user details");
     const id = await actor?.whoami();
-    console.log("ID", id);
+    console.log("my identity", id?.toText());
+
     const userId = id ? id.toText() : null;
-    console.log("USER ID", userId);
     const userFetch = await actor?.get_user(userId!);
-    console.log("USER FETCH", userFetch);
+    console.log("User fetch", userFetch);
+
+    if (!userFetch || userFetch.length === 0) {
+      navigate("/");
+    }
+
     const user =
       userFetch && userFetch.length > 0
         ? {
@@ -87,13 +113,13 @@ export default function AppLayout() {
           }
         : null;
 
-    console.log("USER", user);
     setUser(user);
   };
 
   useEffect(() => {
     if (actor) {
       setUserDetails();
+      checkSuperadmin();
     }
   }, [actor]);
 
@@ -165,7 +191,7 @@ export default function AppLayout() {
       >
         {/* Your authentication modal content */}
         <p>Please login to continue.</p>
-        <Button onClick={login}>Login</Button>
+        <Button onClick={handleLogin}>Login</Button>
       </Modal>
       <UserProfileModal
         visible={userProfileModalVisible}

@@ -42,7 +42,7 @@ const Onramp = () => {
 
   const handleRequestModalOk = () => {
     setRequestSent(false);
-    navigate("/");
+    // navigate("/");
   };
 
   return (
@@ -61,10 +61,10 @@ const Onramp = () => {
             label="Username"
             rules={[{ required: true, message: "Please enter a username" }]}
           >
-            <Input className="p-2" />
+            <Input />
           </Form.Item>
           <Form.Item>
-            <Button type="primary" htmlType="submit" block loading={loading}>
+            <Button className="mt-2" htmlType="submit" block loading={loading}>
               Request access
             </Button>
           </Form.Item>
