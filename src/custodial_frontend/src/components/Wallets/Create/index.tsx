@@ -1,7 +1,6 @@
 "use client";
 import { Button, Modal, Typography, Steps } from "antd";
 import { useState } from "react";
-import { iwallet_backend } from "../../../../../declarations/iwallet_backend";
 import { custodial_backend } from "../../../../../declarations/custodial_backend";
 
 const { Title, Paragraph } = Typography;

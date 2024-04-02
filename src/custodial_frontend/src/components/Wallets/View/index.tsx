@@ -1,6 +1,5 @@
 import { Button, Modal, notification, Tabs } from "antd";
 import { useEffect, useState } from "react";
-import { iwallet_backend } from "../../../../../declarations/iwallet_backend";
 import { useNavigate, useParams } from "react-router-dom";
 import { keccak256, sha3_256 } from "js-sha3";
 import { Buffer } from "buffer";
