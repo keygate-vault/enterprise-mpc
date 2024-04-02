@@ -1,11 +1,13 @@
 type User = record { id : text; status : text; username : text; role : text };
 type Vault = record {
   id : text;
+  access_level : text;
   name : text;
   wallets : vec record { text; Wallet };
 };
 type Wallet = record { id : text; name : text; address : text };
 service : () -> {
+  change_vault_access_level : (text, text) -> ();
   create_user : (text, text) -> (User);
   create_vault : (text) -> (Vault);
   create_wallet : (text, text) -> (opt Wallet);

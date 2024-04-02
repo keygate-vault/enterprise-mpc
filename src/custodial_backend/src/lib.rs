@@ -40,7 +40,18 @@ fn get_vaults() -> BTreeMap<String, Vault> {
 
 #[update]
 async fn create_vault(name: String) -> Vault {
-    let vault = Vault::new(name).await;
+    let caller = ic_cdk::caller();
+    if caller == Principal::anonymous() {
+        ic_cdk::trap("Cannot create vault anonymously. Please log in.");
+    }
+
+    let user = USERS.with(|users| users.borrow().get_user(&caller.to_string()).cloned());
+    if user.is_none() {
+        ic_cdk::trap("User not found. Please create a user first.");
+    }
+
+    let role = user.unwrap().role;
+    let vault = Vault::new(name, role).await;
     if let Err(e) = &vault {
         ic_cdk::trap(&format!("Failed to create vault: {}", e));
     }
@@ -52,6 +63,40 @@ async fn create_vault(name: String) -> Vault {
     });
 
     vault
+}
+
+fn has_higher_access_level(caller_access_level: &str, current_access_level: &str) -> bool {
+    let access_levels = vec!["user", "admin", "superadmin"];
+    let caller_index = access_levels.iter().position(|&r| r == caller_access_level).unwrap_or(0);
+    let current_index = access_levels.iter().position(|&r| r == current_access_level).unwrap_or(0);
+    caller_index > current_index
+}
+
+#[update]
+fn change_vault_access_level(vault_id: String, new_access_level: String) {
+    let caller = ic_cdk::caller();
+    let user = USERS.with(|users| users.borrow().get_user(&caller.to_string()).cloned());
+
+    if let Some(user) = user {
+        let vault = VAULTS.with(|vaults| vaults.borrow().get_vault(&vault_id).cloned());
+
+        if let Some(vault) = vault {
+            let caller_access_level = user.role.clone();
+            let current_access_level = vault.access_level.clone();
+
+            if has_higher_access_level(&caller_access_level, &current_access_level) {
+                VAULTS.with(|vaults| {
+                    vaults.borrow_mut().update_vault_access_level(&vault_id, new_access_level);
+                });
+            } else {
+                ic_cdk::trap("Caller does not have sufficient access level to change vault access level");
+            }
+        } else {
+            ic_cdk::trap("Vault not found");
+        }
+    } else {
+        ic_cdk::trap("User not found");
+    }
 }
 
 #[update]
@@ -90,7 +135,6 @@ async fn get_balance(vault_id: String, wallet_id: String) -> Option<u128> {
         None => None,
     }
 }
-
 
 #[update]
 async fn get_address(vault_id: String, wallet_id: String) -> Option<String> {

@@ -1,7 +1,8 @@
 "use client";
 import { Button, Form, Input, Modal } from "antd";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { custodial_backend } from "../../../../../declarations/custodial_backend";
+import useIdentity from "../../../hooks/useIdentity";
 
 export default function CreateVaultModal({
   visible,
@@ -14,21 +15,27 @@ export default function CreateVaultModal({
 }) {
   const [loading, setLoading] = useState(false);
   const [form] = Form.useForm();
+  const { actor, initIdentity } = useIdentity();
 
   const handleOk = async () => {
     try {
       setLoading(true);
       const values = await form.validateFields();
-      await custodial_backend.create_vault(values.name);
+      console.log("Actor", actor);
+      await actor!.create_vault(values.name);
       setVisible(false);
       refreshVaults();
-      form.resetFields()
+      form.resetFields();
     } catch (error) {
       console.error("Error creating vault:", error);
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    initIdentity();
+  }, []);
 
   const handleCancel = () => {
     setVisible(false);

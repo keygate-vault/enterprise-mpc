@@ -55,6 +55,16 @@ const useIdentity = () => {
     setActor(actorInstance);
   };
 
+  const logout = async () => {
+    if (authClient) {
+      await authClient.logout();
+      setIdentity(null);
+      setActor(undefined);
+    } else {
+      console.error("Auth client is not initialized");
+    }
+  };
+
   const login = async () => {
     console.log("AUTH CLIENT", authClient);
     if (authClient) {
@@ -93,6 +103,7 @@ const useIdentity = () => {
     isAuthenticated,
     isAuthLoading,
     isAuthClientInitialized,
+    logout,
   };
 };
 

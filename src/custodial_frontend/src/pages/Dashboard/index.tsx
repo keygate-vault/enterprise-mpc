@@ -48,6 +48,27 @@ const columns: ColumnProps<Vault>[] = [
       );
     },
   },
+  {
+    title: "ACCESS LEVEL",
+    dataIndex: "accessLevel",
+    key: "accessLevel",
+    width: 200,
+    render: (accessLevel: "user" | "admin" | "superadmin") => {
+      return (
+        <Alert
+          message={
+            accessLevel === "user"
+              ? "User"
+              : accessLevel === "admin"
+              ? "Admin"
+              : "Superadmin"
+          }
+          showIcon
+          type="info"
+        />
+      );
+    },
+  },
 ];
 
 const Dashboard = () => {

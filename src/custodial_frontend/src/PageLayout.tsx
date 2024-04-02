@@ -25,11 +25,13 @@ export default function AppLayout() {
     isAuthenticated,
     isAuthClientInitialized,
     login,
+    logout,
   } = useIdentity();
   const [dropdownVisible, setDropdownVisible] = useState(false);
   const [userProfileModalVisible, setUserProfileModalVisible] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [superadmin, setSuperadmin] = useState<boolean>(false);
+  const [userNotFound, setUserNotFound] = useState(false);
 
   const getSelectedKey = (path?: string): string => {
     if (path === "/") return "1";
@@ -47,7 +49,7 @@ export default function AppLayout() {
     if (e.key === "profile") {
       setUserProfileModalVisible(true);
     } else if (e.key === "logout") {
-      // logout();
+      logout();
     }
     setDropdownVisible(false);
   };
@@ -72,24 +74,23 @@ export default function AppLayout() {
 
   const handleLogin = async () => {
     await login();
-    setUserDetails();
   };
 
-  useEffect(() => {
-    if (actor) {
-      setUserDetails();
-      checkSuperadmin();
-    }
-  }, [actor]);
-
   const checkSuperadmin = async () => {
+    if (!actor) return;
+
     const superadmin = await actor?.superadmin();
     setSuperadmin(!!superadmin && superadmin.length > 0);
     console.log("Superadmin:", superadmin);
-    if (!superadmin || superadmin.length === 0) {
-      navigate("/");
+    if (!superadmin || superadmin.length == 0) {
+      // navigate("/");
+      console.log("Not a superadmin");
     }
   };
+
+  useEffect(() => {
+    checkSuperadmin();
+  }, [actor]);
 
   const setUserDetails = async () => {
     const id = await actor?.whoami();
@@ -99,9 +100,7 @@ export default function AppLayout() {
     const userFetch = await actor?.get_user(userId!);
     console.log("User fetch", userFetch);
 
-    if (!userFetch || userFetch.length === 0) {
-      navigate("/");
-    }
+    console.log("Identity", identity);
 
     const user =
       userFetch && userFetch.length > 0
@@ -114,7 +113,14 @@ export default function AppLayout() {
         : null;
 
     setUser(user);
+    setUserNotFound(!user); // Set userNotFound to true if user is null
   };
+
+  useEffect(() => {
+    if (isAuthenticated() && isAuthClientInitialized() && userNotFound) {
+      navigate("/");
+    }
+  }, [isAuthenticated, isAuthClientInitialized, userNotFound]);
 
   useEffect(() => {
     if (actor) {

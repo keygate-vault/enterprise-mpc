@@ -10,11 +10,12 @@ use crate::wallet::Wallet;
 pub struct Vault {
     pub id: String,
     pub name: String,
-    pub wallets: BTreeMap<String, Wallet>
+    pub wallets: BTreeMap<String, Wallet>,
+    pub access_level: String,
 }
 
 impl Vault {
-    pub async fn new(name: String) -> Result<Self, String> {
+    pub async fn new(name: String, access_level: String) -> Result<Self, String> {
         let (bytes,): (Vec<u8>,) = ic_cdk::call(
             Principal::management_canister(),
             "raw_rand",
@@ -24,7 +25,7 @@ impl Vault {
         .map_err(|e| format!("Failed to generate random ID."))?;
 
         let id = hex::encode(bytes);
-        Ok(Self { id, name, wallets: BTreeMap::new()})
+        Ok(Self { id, name, access_level, wallets: BTreeMap::new()})
     }
 
     pub fn add_wallet(&mut self, wallet: Wallet) {
@@ -77,6 +78,15 @@ impl Vaults {
     pub fn update_vault(&mut self, id: &str, name: String) -> Option<()> {
         if let Some(vault) = self.vaults.get_mut(id) {
             vault.name = name;
+            Some(())
+        } else {
+            None
+        }
+    }
+    
+    pub fn update_vault_access_level(&mut self, id: &str, access_level: String) -> Option<()> {
+        if let Some(vault) = self.vaults.get_mut(id) {
+            vault.access_level = access_level;
             Some(())
         } else {
             None

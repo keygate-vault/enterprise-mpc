@@ -11,22 +11,64 @@ const Onramp = () => {
   const { actor, login, initIdentity } = useIdentity();
   const navigate = useNavigate();
   const [api] = notification.useNotification();
+  const { isAuthenticated, isAuthClientInitialized } = useIdentity();
+  const [userFound, setUserFound] = useState(false);
 
   useEffect(() => {
     initIdentity();
   }, []);
 
+  useEffect(() => {
+    const fetchUserDetails = async () => {
+      if (isAuthenticated() && isAuthClientInitialized()) {
+        try {
+          const id = await actor?.whoami();
+          const userId = id ? id.toText() : null;
+          const userFetch = await actor?.get_user(userId!);
+          console.log("User fetch", userFetch);
+
+          if (userFetch && userFetch.length > 0) {
+            setUserFound(true);
+            console.log("User found");
+          } else {
+            setUserFound(false);
+          }
+        } catch (error) {
+          console.error("Error fetching user details:", error);
+          setUserFound(false);
+        }
+      }
+    };
+
+    fetchUserDetails();
+  }, [isAuthenticated, isAuthClientInitialized, actor]);
+
+  useEffect(() => {
+    if (isAuthenticated() && isAuthClientInitialized() && userFound) {
+      navigate("/vaults");
+    }
+  }, [isAuthenticated, isAuthClientInitialized, userFound, navigate]);
+
   const handleSubmit = async (values: any) => {
     console.log("Form values:", values);
-    await login();
-    console.log("logged in");
     setLoading(true);
-    try {
-      const username = values.username;
-      const role = "user"; // Set the default role as "user"
 
-      // Call the create_user function from the backend canister
-      const user = await actor!.create_user(username, role);
+    try {
+      if (!isAuthenticated()) {
+        console.log("Not authenticated");
+        await login();
+        console.log("logged in");
+      }
+
+      if (!userFound) {
+        const username = values.username;
+        const role = "user"; // Set the default role as "user"
+
+        // Call the create_user function from the backend canister
+        const user = await actor!.create_user(username, role);
+        console.log("User created:", user);
+      }
+
       navigate("/vaults");
     } catch (error) {
       console.error("Setup error:", error);
@@ -55,20 +97,34 @@ const Onramp = () => {
         centered
         maskStyle={{ backgroundColor: "rgba(0, 0, 0, 0.6)" }}
       >
-        <Form onFinish={handleSubmit} layout="vertical" requiredMark={false}>
-          <Form.Item
-            name="username"
-            label="Username"
-            rules={[{ required: true, message: "Please enter a username" }]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item>
-            <Button className="mt-2" htmlType="submit" block loading={loading}>
-              Request access
+        {userFound ? (
+          <div>
+            <p>Welcome back!</p>
+            <Button className="mt-2" onClick={handleSubmit} loading={loading}>
+              Login
             </Button>
-          </Form.Item>
-        </Form>
+          </div>
+        ) : (
+          <Form onFinish={handleSubmit} layout="vertical" requiredMark={false}>
+            <Form.Item
+              name="username"
+              label="Username"
+              rules={[{ required: true, message: "Please enter a username" }]}
+            >
+              <Input />
+            </Form.Item>
+            <Form.Item>
+              <Button
+                className="mt-2"
+                htmlType="submit"
+                block
+                loading={loading}
+              >
+                Request access
+              </Button>
+            </Form.Item>
+          </Form>
+        )}
       </Modal>
       <Modal
         visible={requestSent}
