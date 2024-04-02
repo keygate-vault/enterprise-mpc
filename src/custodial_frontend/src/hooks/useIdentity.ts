@@ -15,14 +15,12 @@ const useIdentity = () => {
   const navigate = useNavigate();
 
   const initIdentity = async () => {
-    console.log("Initializing identity");
     const client = await AuthClient.create();
-    console.log("Auth client", client);
     setAuthClient(client);
-    const identity = client!.getIdentity();
-    setupAgent(identity);
+    const identity = client.getIdentity();
+    await setupAgent(identity);
+    console.log("Actor 1", actor);
     setIdentity(identity);
-    console.log("Identity", identity);
   };
 
   const isAuthLoading = !actor;
@@ -51,6 +49,8 @@ const useIdentity = () => {
         process.env.CANISTER_ID_CUSTODIAL_BACKEND!
       ),
     });
+
+    console.log("Actor 2", actorInstance);
 
     setActor(actorInstance);
   };

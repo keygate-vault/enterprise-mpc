@@ -11,6 +11,7 @@ import useIdentity from "./hooks/useIdentity";
 import { useCallback, useEffect, useState } from "react";
 import { Principal } from "@dfinity/principal";
 import UserProfileModal from "./components/UserProfileModal";
+import { User } from "../../declarations/custodial_backend/custodial_backend.did";
 
 const { Sider, Content } = Layout;
 
@@ -27,6 +28,7 @@ export default function AppLayout() {
   } = useIdentity();
   const [dropdownVisible, setDropdownVisible] = useState(false);
   const [userProfileModalVisible, setUserProfileModalVisible] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
 
   const getSelectedKey = (path?: string): string => {
     if (path === "/") return "1";
@@ -34,22 +36,6 @@ export default function AppLayout() {
     if (path === "/users") return "3";
 
     return "1";
-  };
-
-  const checkSuperadmin = async () => {
-    if (!actor) return;
-
-    const user = await actor.whoami();
-
-    const superadmin = await actor!.superadmin();
-
-    if (!superadmin) {
-      navigate("/");
-    }
-
-    if (superadmin.toString() !== user.toString()) {
-      navigate("/");
-    }
   };
 
   const handleDropdownClick = () => {
@@ -76,12 +62,43 @@ export default function AppLayout() {
     </Menu>
   );
 
-  const authInitialization = useCallback(() => {
-    return isAuthClientInitialized();
-  }, []);
+  const initialize = async () => {
+    if (!isAuthClientInitialized()) {
+      console.log("Initializing identity");
+      await initIdentity();
+    }
+  };
+
+  const setUserDetails = async () => {
+    console.log("Getting user details");
+    const id = await actor?.whoami();
+    console.log("ID", id);
+    const userId = id ? id.toText() : null;
+    console.log("USER ID", userId);
+    const userFetch = await actor?.get_user(userId!);
+    console.log("USER FETCH", userFetch);
+    const user =
+      userFetch && userFetch.length > 0
+        ? {
+            id: userFetch[0]!.id,
+            username: userFetch[0]!.username,
+            role: userFetch[0]!.role,
+            status: userFetch[0]!.status,
+          }
+        : null;
+
+    console.log("USER", user);
+    setUser(user);
+  };
 
   useEffect(() => {
-    initIdentity();
+    if (actor) {
+      setUserDetails();
+    }
+  }, [actor]);
+
+  useEffect(() => {
+    initialize();
   }, []);
 
   return (
@@ -105,6 +122,9 @@ export default function AppLayout() {
             >
               <UserOutlined style={{ fontSize: "18px", cursor: "pointer" }} />
             </Dropdown>
+            <span className="mt-2 text-sm">
+              {user ? user.username : "Loading..."}
+            </span>
           </div>
 
           <Menu

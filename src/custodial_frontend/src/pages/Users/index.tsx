@@ -4,14 +4,14 @@ import Table, { ColumnProps } from "antd/es/table";
 import { useEffect, useState } from "react";
 import { CreateUserModal } from "../../components/Users/Create";
 import { custodial_backend } from "../../../../declarations/custodial_backend";
+import { CheckCircleOutlined } from "@ant-design/icons";
 
 type User = {
   id: string;
   username: string;
   role: string;
+  status: string;
 };
-
-
 
 const Users = () => {
   const [dataSource, setDataSource] = useState<User[]>([]);
@@ -74,11 +74,19 @@ const Users = () => {
       key: "actions",
       render: (text, record) => (
         <Button
-          type="link"
-          className="text-blue-500"
+          type={record.status === "active" ? "default" : "primary"}
+          shape="round"
+          size="small"
           onClick={() => activateUser(record.id)}
+          disabled={record.status === "active"}
+          icon={<CheckCircleOutlined />}
+          style={{
+            backgroundColor: record.status === "active" ? "#e6f7ff" : "#1890ff",
+            color: record.status === "active" ? "#1890ff" : "#fff",
+            borderColor: "#1890ff",
+          }}
         >
-          Activate
+          {record.status === "active" ? "Activated" : "Activate"}
         </Button>
       ),
     },
