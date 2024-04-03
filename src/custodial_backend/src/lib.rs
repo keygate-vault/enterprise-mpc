@@ -101,7 +101,6 @@ fn change_vault_access_level(vault_id: String, new_access_level: String) {
 
 #[update]
 async fn create_wallet(name: String, vault_id: String) -> Option<Wallet> {
-    // check if vault exists
     let exists = VAULTS.with(|vaults| vaults.borrow().get_vault(&vault_id).is_some());
 
     if !exists {

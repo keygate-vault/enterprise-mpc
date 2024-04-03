@@ -206,20 +206,6 @@ const WalletDetail = () => {
                       </div>
                     </div>
                   ))}
-                  {btcWallets.map((wallet, index) => (
-                    <div key={index} className="flex items-center mb-4">
-                      {btcLogo}
-                      <div className="ml-4">
-                        <p className="text-gray-500">
-                          {publicKeyToBTCAddress(user.publicKey)}
-                        </p>
-                        <p className="font-bold">
-                          {wallet.balance} BTC ($
-                          {wallet.usdBalance.toLocaleString()})
-                        </p>
-                      </div>
-                    </div>
-                  ))}
                 </div>
               </TabPane>
               <TabPane tab="Exchanges" key="2">

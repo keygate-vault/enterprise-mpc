@@ -1,4 +1,4 @@
-import { Button, notification, Tabs } from "antd";
+import { Button, Dropdown, Menu, notification, Tabs } from "antd";
 import { useEffect, useState } from "react";
 import { custodial_backend } from "../../../../../declarations/custodial_backend";
 import { useNavigate, useParams } from "react-router-dom";
@@ -40,6 +40,7 @@ const VaultDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [api] = notification.useNotification();
+  const [totalBalance, setTotalBalance] = useState<number>(0);
 
   useEffect(() => {
     if (!id) {
@@ -49,11 +50,33 @@ const VaultDetail = () => {
     }
   }, [id, navigate]);
 
+  useEffect(() => {
+    const calculateTotalBalance = () => {
+      const total = wallets.reduce((acc, wallet) => {
+        const balance = parseFloat(wallet.usdBalance) || 0;
+        return acc + balance;
+      }, 0);
+      setTotalBalance(total);
+    };
+
+    calculateTotalBalance();
+  }, [wallets]);
+
   const loadWalletBalance = async (walletId: string) => {
     try {
       const balance = await custodial_backend.get_balance(id!, walletId);
       const balanceStr = balance.toString();
-      const usdBalance = web3.utils.fromWei(balance.toString(), "ether");
+      const ethBalance = web3.utils.fromWei(balance.toString(), "ether");
+
+      // Fetch ETH price data from CryptoCompare API
+      const response = await fetch(
+        "https://min-api.cryptocompare.com/data/price?fsym=ETH&tsyms=USD"
+      );
+      const data = await response.json();
+      const ethPriceUSD = data.USD;
+
+      // Calculate USD balance
+      const usdBalance = (parseFloat(ethBalance) * ethPriceUSD).toFixed(2);
 
       setWallets((prevWallets) =>
         prevWallets.map((wallet) =>
@@ -155,7 +178,13 @@ const VaultDetail = () => {
         </div>
         <div className="bg-white p-6 rounded-lg shadow">
           <h3 className="text-lg font-bold mb-4">Balance</h3>
-          <p className="text-4xl font-bold">$35.97</p>
+          {isLoading ? (
+            <p className="animate-pulse h-8 bg-gray-300 w-[100px]"></p>
+          ) : (
+            <p className="text-4xl font-bold">
+              ${totalBalance.toLocaleString()}
+            </p>
+          )}
         </div>
         <div className="mt-8">
           <Tabs defaultActiveKey="1">
@@ -197,19 +226,37 @@ const VaultDetail = () => {
                               : "opacity-0 h-0 overflow-hidden"
                           }`}
                         >
-                          <p className="text-gray-500">{wallet.address}</p>
+                          <div className="text-gray-500">{wallet.address}</div>
                           {wallet.balanceLoading ? (
-                            <p className="animate-pulse h-4 bg-gray-300 w-[100px]"></p>
+                            <>
+                              <div className="animate-pulse h-4 bg-gray-300 w-[100px]"></div>
+                            </>
                           ) : (
-                            <p className="font-bold">
-                              {web3.utils
-                                .fromWei(wallet.balance, "ether")
-                                .replaceAll(".", "")}{" "}
-                              ETH ($
-                              {parseFloat(wallet.usdBalance).toLocaleString()})
-                            </p>
+                            <div className="font-semibold flex flex-col">
+                              <div>
+                                {web3.utils
+                                  .fromWei(wallet.balance, "ether")
+                                  .replaceAll(".", "")}{" "}
+                                ETH ($
+                                {parseFloat(wallet.usdBalance).toLocaleString()}
+                                )
+                              </div>
+                            </div>
                           )}
                         </div>
+                      </div>
+                      <div className="ml-auto">
+                        <Dropdown
+                          overlay={
+                            <Menu>
+                              <Menu.Item key="transfer">Transfer</Menu.Item>
+                              <Menu.Item key="execute">Execute</Menu.Item>
+                            </Menu>
+                          }
+                          trigger={["click"]}
+                        >
+                          <Button>Actions</Button>
+                        </Dropdown>
                       </div>
                     </div>
                   ))}
