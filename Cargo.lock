@@ -491,6 +491,7 @@ version = "0.1.0"
 dependencies = [
  "candid",
  "candid_parser",
+ "ethaddr",
  "ethers-core",
  "getrandom",
  "hex",
@@ -503,6 +504,7 @@ dependencies = [
  "rand",
  "serde",
  "serde_bytes",
+ "serde_json",
 ]
 
 [[package]]
@@ -679,6 +681,16 @@ dependencies = [
  "sha3 0.10.8",
  "thiserror",
  "uint",
+]
+
+[[package]]
+name = "ethaddr"
+version = "0.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ecbcc1770d1b2e3fb83915c80c47a10efbe1964544a40e0211fe40274f8363c8"
+dependencies = [
+ "serde",
+ "sha3 0.10.8",
 ]
 
 [[package]]

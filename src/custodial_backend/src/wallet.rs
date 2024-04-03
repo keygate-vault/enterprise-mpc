@@ -1,7 +1,9 @@
 
-use std::borrow::{Borrow, BorrowMut};
+use std::{borrow::{Borrow, BorrowMut}, str::FromStr};
 
 use candid::{CandidType, Nat, Principal};
+use ethaddr::Address;
+use ethers_core::{k256::{ecdsa::{self, VerifyingKey}, Secp256k1}, types::{NameOrAddress, U256, U64}, utils::keccak256};
 use ic_cdk::{api, caller};
 use serde::{Deserialize, Serialize};
 use ic_interfaces_adapter_client::RpcError;
@@ -82,6 +84,21 @@ pub struct Wallet {
     pub address: String,
 }
 
+async fn get_publickey(id: String) -> Result<Vec<u8>, String> {
+    let (pubkey_result,): (Result<PublicKeyReply, String>,) = ic_cdk::call(Principal::from_text(id.clone()).unwrap(), "public_key", ())
+    .await
+    .unwrap();
+    
+    let pubkey_reply = match pubkey_result {
+        Ok(pubkey) => pubkey,
+        Err(e) => {
+            return Err(format!("Failed to get public key: {}", e));
+        }
+    };
+
+    Ok(pubkey_reply.public_key)
+}
+
 async fn get_address(id: String) -> String {
     let (pubkey_result,): (Result<PublicKeyReply, String>,) = ic_cdk::call(Principal::from_text(id.clone()).unwrap(), "public_key", ())
     .await
@@ -99,13 +116,55 @@ async fn get_address(id: String) -> String {
     addr
 }
 
-static RPC_SERVICE : RpcService = RpcService::EthSepolia(crate::rpc::EthSepoliaService::PublicNode);
 
+static RPC_SERVICE : RpcService = RpcService::EthSepolia(crate::rpc::EthSepoliaService::PublicNode);
 
 impl Wallet {
 
     pub async fn get_address(&self) -> String {
         get_address(self.id.to_string()).await
+    }
+
+    pub async fn get_nonce(&self) -> u64 {
+        let payload = format!(r#"{{"jsonrpc":"2.0","method":"eth_getTransactionCount","params":["{}","latest"],"id":1}}"#, self.address);
+        const MAX_RESPONSE_SIZE: u64 = 1000;
+        let canister_id = Principal::from_text("7hfb6-caaaa-aaaar-qadga-cai").unwrap();
+        let params = (
+            &RPC_SERVICE,
+            payload,
+            MAX_RESPONSE_SIZE,
+        );
+
+        let (cycles_result,): (Result<u128, String>,) =
+            ic_cdk::api::call::call(canister_id, "requestCost", params.clone())
+                .await
+                .unwrap();
+
+        let cycles = cycles_result.unwrap_or_else(|e| {
+            ic_cdk::trap(&format!("error in `request_cost`: {:?}", e))
+        });
+
+        let (result,): (Result<String, String>,) =
+            ic_cdk::api::call::call_with_payment128(canister_id, "request", params, cycles)
+                .await
+                .unwrap();
+
+        ic_cdk::println!("RPC result: {:?}", result);
+
+        match result {
+            Ok(response) => {
+                match u64::from_str_radix(&response[36..response.len() - 2], 16) {
+                    Ok(nonce) => nonce,
+                    Err(e) => {
+                        ic_cdk::trap(&format!(
+                            "error parsing nonce from response: {:?}, response: {:?}",
+                            e, response
+                        ))
+                    }
+                }
+            }
+            Err(err) => ic_cdk::trap(&format!("error in `request` with cycles: {:?}", err)),
+        }
     }
 
     pub async fn get_balance(&self) -> u128 {

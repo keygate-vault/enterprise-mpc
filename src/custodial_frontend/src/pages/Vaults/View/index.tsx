@@ -7,6 +7,7 @@ import { Buffer } from "buffer";
 import { LeftOutlined, PlusOutlined, WalletFilled } from "@ant-design/icons";
 import CreateWalletModal from "../../../components/Wallets/Create";
 import web3 from "web3";
+import TransferModal from "../../../components/TransferModal";
 
 const { TabPane } = Tabs;
 
@@ -41,6 +42,8 @@ const VaultDetail = () => {
   const navigate = useNavigate();
   const [api] = notification.useNotification();
   const [totalBalance, setTotalBalance] = useState<number>(0);
+  const [transferModalVisible, setTransferModalVisible] = useState(false);
+  const [fromWallet, setFromWallet] = useState<Wallet | null>(null);
 
   useEffect(() => {
     if (!id) {
@@ -147,6 +150,12 @@ const VaultDetail = () => {
 
   return (
     <main className="flex min-h-screen flex-col items-left p-16">
+      <TransferModal
+        visible={transferModalVisible}
+        fromWallet={fromWallet}
+        setVisible={setTransferModalVisible}
+        onCancel={() => setTransferModalVisible(false)}
+      ></TransferModal>
       <CreateWalletModal
         vaultId={id!}
         visible={open}
@@ -234,9 +243,7 @@ const VaultDetail = () => {
                           ) : (
                             <div className="font-semibold flex flex-col">
                               <div>
-                                {web3.utils
-                                  .fromWei(wallet.balance, "ether")
-                                  .replaceAll(".", "")}{" "}
+                                {web3.utils.fromWei(wallet.balance, "ether")}{" "}
                                 ETH ($
                                 {parseFloat(wallet.usdBalance).toLocaleString()}
                                 )
@@ -249,7 +256,15 @@ const VaultDetail = () => {
                         <Dropdown
                           overlay={
                             <Menu>
-                              <Menu.Item key="transfer">Transfer</Menu.Item>
+                              <Menu.Item
+                                key="transfer"
+                                onClick={() => {
+                                  setTransferModalVisible(true);
+                                  setFromWallet(wallet);
+                                }}
+                              >
+                                Transfer
+                              </Menu.Item>
                               <Menu.Item key="execute">Execute</Menu.Item>
                             </Menu>
                           }
