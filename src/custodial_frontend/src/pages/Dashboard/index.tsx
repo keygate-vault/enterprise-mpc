@@ -30,8 +30,6 @@ const columns: ColumnProps<Vault>[] = [
     dataIndex: "blockchains",
     key: "blockchains",
     render: (blockchains: string[]) => {
-      // show eth and btc icon accordingly (can show both if both are present in the array)
-      // use svgs
       return (
         <div>
           {blockchains.map((blockchain) => {
@@ -84,12 +82,6 @@ const Dashboard = () => {
 
   const fetchVaults = async () => {
     try {
-      const superadmin = await custodial_backend.superadmin();
-      console.log("Superadmin:", superadmin);
-      if (superadmin.length === 0) {
-        // navigate("/");
-      }
-
       setIsLoading(true);
       const response = await custodial_backend.get_vaults();
       const vaults = response.map((vault) => ({

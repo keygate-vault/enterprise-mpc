@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { Modal, Form, Input, Button, Progress, notification } from "antd";
 import useIdentity from "../../hooks/useIdentity";
 import { useNavigate } from "react-router-dom";
-import { custodial_backend } from "../../../../declarations/custodial_backend";
 
 const Onramp = () => {
   const [visible, setVisible] = useState(true);
@@ -11,7 +10,7 @@ const Onramp = () => {
   const { actor, login, initIdentity } = useIdentity();
   const navigate = useNavigate();
   const [api] = notification.useNotification();
-  const { isAuthenticated, isAuthClientInitialized } = useIdentity();
+  const { isAuthenticated, isAuthReady } = useIdentity();
   const [userFound, setUserFound] = useState(false);
 
   useEffect(() => {
@@ -20,16 +19,14 @@ const Onramp = () => {
 
   useEffect(() => {
     const fetchUserDetails = async () => {
-      if (isAuthenticated() && isAuthClientInitialized()) {
+      if (isAuthenticated() && isAuthReady()) {
         try {
           const id = await actor?.whoami();
           const userId = id ? id.toText() : null;
           const userFetch = await actor?.get_user(userId!);
-          console.log("User fetch", userFetch);
 
           if (userFetch && userFetch.length > 0) {
             setUserFound(true);
-            console.log("User found");
           } else {
             setUserFound(false);
           }
@@ -41,13 +38,13 @@ const Onramp = () => {
     };
 
     fetchUserDetails();
-  }, [isAuthenticated, isAuthClientInitialized, actor]);
+  }, [actor]);
 
   useEffect(() => {
-    if (isAuthenticated() && isAuthClientInitialized() && userFound) {
+    if (isAuthenticated() && isAuthReady() && userFound) {
       navigate("/vaults");
     }
-  }, [isAuthenticated, isAuthClientInitialized, userFound, navigate]);
+  }, [userFound]);
 
   const handleSubmit = async (values: any) => {
     console.log("Form values:", values);

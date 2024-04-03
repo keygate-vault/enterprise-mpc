@@ -23,7 +23,7 @@ export default function AppLayout() {
     identity,
     initIdentity,
     isAuthenticated,
-    isAuthClientInitialized,
+    isAuthReady,
     login,
     logout,
   } = useIdentity();
@@ -66,8 +66,7 @@ export default function AppLayout() {
   );
 
   const initialize = async () => {
-    if (!isAuthClientInitialized()) {
-      console.log("Initializing identity");
+    if (!isAuthReady()) {
       await initIdentity();
     }
   };
@@ -81,11 +80,6 @@ export default function AppLayout() {
 
     const superadmin = await actor?.superadmin();
     setSuperadmin(!!superadmin && superadmin.length > 0);
-    console.log("Superadmin:", superadmin);
-    if (!superadmin || superadmin.length == 0) {
-      // navigate("/");
-      console.log("Not a superadmin");
-    }
   };
 
   useEffect(() => {
@@ -94,13 +88,9 @@ export default function AppLayout() {
 
   const setUserDetails = async () => {
     const id = await actor?.whoami();
-    console.log("my identity", id?.toText());
 
     const userId = id ? id.toText() : null;
     const userFetch = await actor?.get_user(userId!);
-    console.log("User fetch", userFetch);
-
-    console.log("Identity", identity);
 
     const user =
       userFetch && userFetch.length > 0
@@ -117,10 +107,10 @@ export default function AppLayout() {
   };
 
   useEffect(() => {
-    if (isAuthenticated() && isAuthClientInitialized() && userNotFound) {
+    if (isAuthenticated() && isAuthReady() && userNotFound) {
       navigate("/");
     }
-  }, [isAuthenticated, isAuthClientInitialized, userNotFound]);
+  }, [userNotFound]);
 
   useEffect(() => {
     if (actor) {
@@ -192,7 +182,7 @@ export default function AppLayout() {
       </Layout>
       <Modal
         centered
-        visible={!isAuthenticated() && isAuthClientInitialized()}
+        visible={!isAuthenticated() && isAuthReady()}
         footer={null}
       >
         {/* Your authentication modal content */}
