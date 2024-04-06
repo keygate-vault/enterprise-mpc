@@ -21,17 +21,10 @@ type Wallet = {
   id: string;
   address?: string;
   balance: string;
-  usdBalance: string;
   balanceLoading: boolean;
 };
 
-const ethLogo = (
-  <img src="/public/eth.svg" alt="ETH" className="w-[32px] h-[32px]" />
-);
-
-const btcLogo = (
-  <img src="/public/btc.svg" alt="BTC" className="w-[32px] h-[32px]" />
-);
+const ethLogo = <img src="/eth.svg" alt="ETH" className="w-[32px] h-[32px]" />;
 
 const VaultDetail = () => {
   const [vault, setVault] = useState<Vault | null>(null);
@@ -56,7 +49,8 @@ const VaultDetail = () => {
   useEffect(() => {
     const calculateTotalBalance = () => {
       const total = wallets.reduce((acc, wallet) => {
-        const balance = parseFloat(wallet.usdBalance) || 0;
+        const balance =
+          parseFloat(web3.utils.fromWei(wallet.balance, "ether")) || 0;
         return acc + balance;
       }, 0);
       setTotalBalance(total);
@@ -69,17 +63,6 @@ const VaultDetail = () => {
     try {
       const balance = await custodial_backend.get_balance(id!, walletId);
       const balanceStr = balance.toString();
-      const ethBalance = web3.utils.fromWei(balance.toString(), "ether");
-
-      // Fetch ETH price data from CryptoCompare API
-      const response = await fetch(
-        "https://min-api.cryptocompare.com/data/price?fsym=ETH&tsyms=USD"
-      );
-      const data = await response.json();
-      const ethPriceUSD = data.USD;
-
-      // Calculate USD balance
-      const usdBalance = (parseFloat(ethBalance) * ethPriceUSD).toFixed(2);
 
       setWallets((prevWallets) =>
         prevWallets.map((wallet) =>
@@ -87,7 +70,6 @@ const VaultDetail = () => {
             ? {
                 ...wallet,
                 balance: balanceStr,
-                usdBalance,
                 balanceLoading: false,
               }
             : wallet
@@ -122,7 +104,6 @@ const VaultDetail = () => {
         id: wallet[0],
         address: wallet[1].address,
         balance: "0",
-        usdBalance: "0",
         balanceLoading: true,
       }));
 
@@ -191,7 +172,7 @@ const VaultDetail = () => {
             <p className="animate-pulse h-8 bg-gray-300 w-[100px]"></p>
           ) : (
             <p className="text-4xl font-bold">
-              ${totalBalance.toLocaleString()}
+              {totalBalance.toLocaleString()} ETH
             </p>
           )}
         </div>
@@ -204,7 +185,7 @@ const VaultDetail = () => {
                     <h3 className="text-lg mt-0 font-bold align-top mb-4">
                       Vault Funding
                     </h3>
-                    <p className="text-gray-500">$0</p>
+                    <p className="text-gray-500">0 ETH</p>
                   </div>
                   <div className="align-bottom">
                     <Button type="primary" onClick={() => setOpen(true)}>
@@ -241,13 +222,8 @@ const VaultDetail = () => {
                               <div className="animate-pulse h-4 bg-gray-300 w-[100px]"></div>
                             </>
                           ) : (
-                            <div className="font-semibold flex flex-col">
-                              <div>
-                                {web3.utils.fromWei(wallet.balance, "ether")}{" "}
-                                ETH ($
-                                {parseFloat(wallet.usdBalance).toLocaleString()}
-                                )
-                              </div>
+                            <div className="font-semibold">
+                              {web3.utils.fromWei(wallet.balance, "ether")} ETH
                             </div>
                           )}
                         </div>

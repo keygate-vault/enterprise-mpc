@@ -489,6 +489,7 @@ dependencies = [
 name = "custodial_backend"
 version = "0.1.0"
 dependencies = [
+ "bincode",
  "candid",
  "candid_parser",
  "ethaddr",

@@ -3,7 +3,7 @@ use std::{borrow::{Borrow, BorrowMut}, str::FromStr};
 
 use candid::{CandidType, Nat, Principal};
 use ethaddr::Address;
-use ethers_core::{k256::{ecdsa::{self, VerifyingKey}, Secp256k1}, types::{NameOrAddress, U256, U64}, utils::keccak256};
+use ethers_core::{ k256::{ecdsa::{self, Signature, VerifyingKey}, Secp256k1}, types::{NameOrAddress, U256, U64}, utils::keccak256};
 use ic_cdk::{api, caller};
 use serde::{Deserialize, Serialize};
 use ic_interfaces_adapter_client::RpcError;
@@ -116,7 +116,6 @@ async fn get_address(id: String) -> String {
     addr
 }
 
-
 static RPC_SERVICE : RpcService = RpcService::EthSepolia(crate::rpc::EthSepoliaService::PublicNode);
 
 impl Wallet {
@@ -149,7 +148,7 @@ impl Wallet {
                 .await
                 .unwrap();
 
-        ic_cdk::println!("RPC result: {:?}", result);
+        ic_cdk::println!("RPC result is: {:?}", result);
 
         match result {
             Ok(response) => {
@@ -162,6 +161,101 @@ impl Wallet {
                         ))
                     }
                 }
+            }
+            Err(err) => ic_cdk::trap(&format!("error in `request` with cycles: {:?}", err)),
+        }
+    }
+
+    pub async fn sign(&self, txhash: &[u8; 32]) -> Vec<u8> {
+        // call sign on the wallet canister
+        // async fn sign(message: Vec<u8>) -> Result<SignatureReply, String> {
+        let (signature_result,): (Result<Vec<u8>, String>,) = ic_cdk::call(Principal::from_text(self.id.clone()).unwrap(), "sign", (txhash.to_vec(),))
+        .await
+        .unwrap();
+
+        return signature_result.unwrap();
+    }
+
+    pub async fn transfer(&self, address: String, amount: u64) {
+        use ethers_core::types::transaction::eip1559::Eip1559TransactionRequest;
+        use ethers_core::types::Signature;
+
+        const EIP1559_TX_ID: u8 = 2;
+        let nonce = self.get_nonce().await;
+
+        let tx = Eip1559TransactionRequest {
+            chain_id: Some(U64::from(11155111)),
+            from: None,
+            to: Some(
+                NameOrAddress::from_str(&address)
+                    .expect("Failed to parse destination address.")
+                    .into(),
+            ),
+            gas: Some(U256::from(21000)),
+            value: Some(U256::from(amount)),
+            data: None,
+            access_list: Default::default(),
+            max_priority_fee_per_gas: Some(U256::from(1500000000)), // 1.5 Gwei
+            max_fee_per_gas: Some(U256::from(1500000000)),         // 1.5 Gwei
+            nonce: Some(U256::from(nonce)),
+        };
+
+
+        let mut unsigned_tx_bytes = tx.rlp().to_vec();
+        unsigned_tx_bytes.insert(0, EIP1559_TX_ID);
+
+        let txhash = keccak256(&unsigned_tx_bytes);
+        let signature_bytes = self.sign(&txhash).await;
+
+        let signature = match Signature::try_from(&signature_bytes[..]) {
+            Ok(sig) => sig,
+            Err(err) => {
+                // Handle the error case
+                ic_cdk::println!("Failed to decode signature.. {:?}", err);
+                eprintln!("Failed to decode signature: {:?}", err);
+                return;
+            }
+        };
+
+        let mut signed_tx_bytes = tx.rlp_signed(&signature).to_vec();
+
+        // Convert the signed transaction bytes to a hex string
+        let signed_tx_hex = hex::encode(signed_tx_bytes);
+
+        // Create the JSON-RPC payload
+        let payload = format!(
+            r#"{{
+                "jsonrpc": "2.0",
+                "method": "eth_sendRawTransaction",
+                "params": ["0x{}"],
+                "id": 1
+            }}"#,
+            signed_tx_hex
+        );
+
+        ic_cdk::println!("Payload: {}", payload);
+
+        const MAX_RESPONSE_SIZE: u64 = 1000;
+        let canister_id = Principal::from_text("7hfb6-caaaa-aaaar-qadga-cai").unwrap();
+        let params = (&RPC_SERVICE, payload, MAX_RESPONSE_SIZE);
+
+        let (cycles_result,): (Result<u128, String>,) = ic_cdk::api::call::call(canister_id, "requestCost", params.clone())
+            .await
+            .unwrap();
+        let cycles = cycles_result.unwrap_or_else(|e| {
+            ic_cdk::trap(&format!("error in `request_cost`: {:?}", e))
+        });
+
+        let (result,): (Result<String, String>,) =
+            ic_cdk::api::call::call_with_payment128(canister_id, "request", params, cycles)
+                .await
+                .unwrap();
+
+        ic_cdk::println!("RPC result: {:?}", result);
+
+        match result {
+            Ok(response) => {
+                ic_cdk::println!("Transaction sent: {:?}", response);
             }
             Err(err) => ic_cdk::trap(&format!("error in `request` with cycles: {:?}", err)),
         }
@@ -219,7 +313,7 @@ impl Wallet {
             management_canister,
             "create_canister",
             (),
-            100000000000u128,
+            200000000000u128,
         )
         .await;
 

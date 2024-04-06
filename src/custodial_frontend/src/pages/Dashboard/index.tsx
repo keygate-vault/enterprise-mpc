@@ -36,7 +36,7 @@ const columns: ColumnProps<Vault>[] = [
             return (
               <img
                 key={blockchain}
-                src={`/public/${blockchain}.svg`}
+                src={`/${blockchain}.svg`}
                 alt={blockchain}
                 className="w-6 h-6 mr-[-8px]"
               />

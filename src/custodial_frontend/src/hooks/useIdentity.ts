@@ -35,14 +35,18 @@ const useIdentity = () => {
     const identity = authClient.getIdentity();
     if (!identity) return false;
 
-    if (identity.constructor.name !== "DelegationIdentity") return false;
+    if (
+      identity.constructor.name === "AnonymousIdentity" ||
+      identity.constructor.name === "kE"
+    )
+      return false;
 
     return true;
   }
 
   const setupAgent = async (identity: Identity) => {
-    const agent = new HttpAgent({ identity, host: "http://localhost:3000" });
-    await agent.fetchRootKey();
+    const agent = new HttpAgent({ identity });
+    // await agent.fetchRootKey();
     const actorInstance = Actor.createActor<_SERVICE>(idlFactory, {
       agent,
       canisterId: Principal.fromText(

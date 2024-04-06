@@ -22,5 +22,6 @@ service : () -> {
   set_user_status : (text, text) -> ();
   setup : () -> (principal);
   superadmin : () -> (opt principal) query;
+  transfer : (text, text, text, nat64) -> (opt null);
   whoami : () -> (principal) query;
 }
