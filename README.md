@@ -1,5 +1,5 @@
 # Cerberus
-
+💝 This project received a $2500 grant from the DFINITY foundation.
 
 ## Overview
 
