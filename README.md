@@ -77,25 +77,23 @@ The EVM RPC Canister acts as a bridge between the Wallets and the Ethereum Netwo
 This design allows Users to securely manage their Vaults and Wallets, interact with the Ethereum Network through the EVM RPC Canister, and perform various operations such as signing transactions, sending transactions, and querying balances and addresses.
 
 ## Installation
-If you want to test your project locally, you can use the following commands:
-
 ```bash
 dfx deps pull
 dfx deps deploy evm_rpc
 dfx deps deploy internet_identity
 ```
 
-# Starts the replica, running in the background
+## Starts the replica, running in the background
+```bash
 dfx start --background
+```
 
-# Deploys your canisters to the replica and generates your candid interface
+## Deploys your canisters to the replica and generates your candid interface
+``` bash
 dfx deploy
 ```
 
 Once the job completes, your application will be available at `http://localhost:4943?canisterId={asset_canister_id}`.
-
-If you have made changes to your backend canister, you can generate a new candid interface with
-
 ```bash
 npm run generate
 ```
